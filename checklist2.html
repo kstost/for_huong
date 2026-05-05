@@ -1,0 +1,2786 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Danh sách kiểm tra bảo mật ứng dụng Web toàn diện</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --surface-2: #273449;
+    --text: #e2e8f0;
+    --text-dim: #94a3b8;
+    --accent: #38bdf8;
+    --accent-2: #818cf8;
+    --success: #4ade80;
+    --warning: #fbbf24;
+    --danger: #f87171;
+    --border: #334155;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", "Inter", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+    color: var(--text);
+    line-height: 1.65;
+    min-height: 100vh;
+  }
+  header {
+    background: linear-gradient(135deg, #1e293b 0%, #312e81 100%);
+    padding: 60px 24px 50px;
+    text-align: center;
+    border-bottom: 3px solid var(--accent);
+    box-shadow: 0 4px 30px rgba(56, 189, 248, 0.15);
+  }
+  header h1 {
+    font-size: 2.4rem;
+    margin-bottom: 12px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  header p {
+    color: var(--text-dim);
+    font-size: 1.05rem;
+    max-width: 900px;
+    margin: 0 auto 20px;
+  }
+  .stats {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-top: 24px;
+  }
+  .stat-box {
+    background: rgba(15, 23, 42, 0.6);
+    padding: 14px 24px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    min-width: 140px;
+  }
+  .stat-box .num {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .stat-box .label {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px 20px 80px;
+  }
+  .controls {
+    position: sticky;
+    top: 0;
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    border: 1px solid var(--border);
+    z-index: 100;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+  }
+  .search-box {
+    flex: 1;
+    min-width: 240px;
+    padding: 10px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 0.95rem;
+  }
+  .search-box:focus {
+    outline: 2px solid var(--accent);
+    border-color: var(--accent);
+  }
+  .btn {
+    padding: 10px 16px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+  }
+  .btn:hover {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+  }
+  .btn-danger:hover { background: var(--danger); border-color: var(--danger); }
+  .progress-wrapper {
+    margin-bottom: 28px;
+    padding: 18px;
+    background: var(--surface);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+  .progress-bar {
+    height: 18px;
+    background: var(--bg);
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--success), var(--accent));
+    width: 0%;
+    transition: width 0.3s;
+    text-align: right;
+    color: #052e16;
+    font-weight: 700;
+    font-size: 0.8rem;
+    line-height: 18px;
+    padding-right: 8px;
+  }
+  .progress-text {
+    margin-top: 8px;
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    text-align: center;
+  }
+  .toc {
+    background: var(--surface);
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    margin-bottom: 30px;
+  }
+  .toc h2 {
+    color: var(--accent);
+    margin-bottom: 14px;
+    font-size: 1.2rem;
+  }
+  .toc ol {
+    columns: 2;
+    column-gap: 30px;
+    padding-left: 20px;
+  }
+  .toc li {
+    margin-bottom: 6px;
+    break-inside: avoid;
+  }
+  .toc a {
+    color: var(--text-dim);
+    text-decoration: none;
+    transition: color 0.2s;
+    font-size: 0.95rem;
+  }
+  .toc a:hover { color: var(--accent); }
+  .category {
+    background: var(--surface);
+    border-radius: 14px;
+    margin-bottom: 22px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+  }
+  .category:hover {
+    box-shadow: 0 4px 20px rgba(56, 189, 248, 0.1);
+  }
+  .category-header {
+    padding: 22px 26px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(90deg, var(--surface) 0%, var(--surface-2) 100%);
+    border-bottom: 1px solid var(--border);
+    user-select: none;
+  }
+  .category-header:hover {
+    background: linear-gradient(90deg, var(--surface-2) 0%, #2d3b51 100%);
+  }
+  .category-header h2 {
+    font-size: 1.25rem;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .category-header h2 .icon {
+    font-size: 1.4rem;
+  }
+  .category-header h2 .num-badge {
+    background: var(--accent);
+    color: var(--bg);
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-right: 4px;
+  }
+  .category-meta {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+  }
+  .toggle-icon {
+    transition: transform 0.3s;
+    font-size: 1.2rem;
+    color: var(--text-dim);
+  }
+  .category.collapsed .toggle-icon {
+    transform: rotate(-90deg);
+  }
+  .category-body {
+    padding: 16px 26px 24px;
+    max-height: 50000px;
+    transition: max-height 0.4s ease, padding 0.4s ease, opacity 0.3s ease;
+    overflow: hidden;
+  }
+  .category.collapsed .category-body {
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    opacity: 0;
+  }
+  .category-intro {
+    background: rgba(56, 189, 248, 0.07);
+    border-left: 4px solid var(--accent);
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    color: var(--text-dim);
+    font-size: 0.95rem;
+  }
+  .subcategory {
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px dashed var(--border);
+  }
+  .subcategory:first-of-type {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+  }
+  .subcategory h3 {
+    color: var(--accent-2);
+    font-size: 1.08rem;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .check-item {
+    display: flex;
+    gap: 14px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    background: var(--bg);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .check-item:hover {
+    border-color: var(--accent);
+  }
+  .check-item.checked {
+    background: rgba(74, 222, 128, 0.06);
+    border-color: rgba(74, 222, 128, 0.4);
+  }
+  .check-item input[type="checkbox"] {
+    width: 22px;
+    height: 22px;
+    cursor: pointer;
+    accent-color: var(--success);
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .check-content {
+    flex: 1;
+  }
+  .check-title {
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+    font-size: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .severity {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .sev-critical { background: rgba(248, 113, 113, 0.2); color: var(--danger); border: 1px solid var(--danger); }
+  .sev-high { background: rgba(251, 146, 60, 0.2); color: #fb923c; border: 1px solid #fb923c; }
+  .sev-medium { background: rgba(251, 191, 36, 0.2); color: var(--warning); border: 1px solid var(--warning); }
+  .sev-low { background: rgba(96, 165, 250, 0.2); color: #60a5fa; border: 1px solid #60a5fa; }
+  .sev-info { background: rgba(148, 163, 184, 0.2); color: var(--text-dim); border: 1px solid var(--text-dim); }
+  .check-desc {
+    color: var(--text-dim);
+    font-size: 0.92rem;
+    margin-bottom: 8px;
+  }
+  .check-detail {
+    background: rgba(56, 189, 248, 0.04);
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 0.88rem;
+    color: var(--text-dim);
+    border-left: 3px solid var(--accent);
+    margin-top: 8px;
+  }
+  .check-detail strong {
+    color: var(--text);
+  }
+  .check-tools {
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+  }
+  .check-tools code {
+    background: var(--surface-2);
+    padding: 2px 8px;
+    border-radius: 4px;
+    color: var(--accent);
+    font-family: "Consolas", "Monaco", monospace;
+    font-size: 0.85rem;
+    margin-right: 4px;
+    display: inline-block;
+    margin-bottom: 2px;
+  }
+  .hidden { display: none !important; }
+  footer {
+    text-align: center;
+    padding: 30px 20px;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    border-top: 1px solid var(--border);
+    margin-top: 50px;
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+  @media (max-width: 768px) {
+    header h1 { font-size: 1.7rem; }
+    .toc ol { columns: 1; }
+    .category-header h2 { font-size: 1.05rem; }
+    .check-title { font-size: 0.95rem; }
+  }
+  @media print {
+    .controls, .toc, footer { display: none; }
+    .category { break-inside: avoid; box-shadow: none; }
+    body { background: white; color: black; }
+    .check-item { background: white; border: 1px solid #ccc; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🛡️ Danh sách kiểm tra bảo mật ứng dụng Web toàn diện</h1>
+  <p>Bộ tiêu chí kiểm thử bảo mật chi tiết cho website và ứng dụng web — dựa trên OWASP Testing Guide, OWASP ASVS, NIST SP 800-115, PTES và các tiêu chuẩn ngành. Mỗi mục bao gồm mô tả chi tiết, mức độ nghiêm trọng và công cụ đề xuất.</p>
+  <div class="stats">
+    <div class="stat-box">
+      <div class="num" id="total-items">0</div>
+      <div class="label">Tổng mục kiểm tra</div>
+    </div>
+    <div class="stat-box">
+      <div class="num" id="total-categories">0</div>
+      <div class="label">Hạng mục lớn</div>
+    </div>
+    <div class="stat-box">
+      <div class="num" id="checked-count">0</div>
+      <div class="label">Đã hoàn thành</div>
+    </div>
+    <div class="stat-box">
+      <div class="num" id="completion-rate">0%</div>
+      <div class="label">Tiến độ</div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+<div class="controls">
+  <input type="text" id="search" class="search-box" placeholder="🔍 Tìm kiếm mục kiểm tra (ví dụ: SQL injection, XSS, CSRF, JWT, header...)">
+  <button class="btn" onclick="expandAll()">📂 Mở rộng tất cả</button>
+  <button class="btn" onclick="collapseAll()">📁 Thu gọn tất cả</button>
+  <button class="btn" onclick="exportReport()">📊 Xuất báo cáo</button>
+  <button class="btn btn-danger" onclick="resetAll()">♻️ Đặt lại</button>
+</div>
+
+<div class="progress-wrapper">
+  <div class="progress-bar">
+    <div class="progress-fill" id="progress-fill">0%</div>
+  </div>
+  <div class="progress-text" id="progress-text">Hãy bắt đầu kiểm tra để theo dõi tiến độ</div>
+</div>
+
+<div class="toc" id="toc">
+  <h2>📑 Mục lục các hạng mục kiểm tra</h2>
+  <ol id="toc-list"></ol>
+</div>
+
+<main id="checklist">
+
+<!-- ============ 1. THU THẬP THÔNG TIN ============ -->
+<section class="category" id="cat-1">
+  <div class="category-header" onclick="toggleCategory(this)">
+    <h2><span class="num-badge">01</span><span class="icon">🔍</span>Thu thập thông tin (Information Gathering &amp; Reconnaissance)</h2>
+    <div class="category-meta"><span class="cat-progress">0/0</span><span class="toggle-icon">▼</span></div>
+  </div>
+  <div class="category-body">
+    <div class="category-intro">
+      Giai đoạn trinh sát là bước đầu tiên và quan trọng nhất của bất kỳ cuộc kiểm thử thâm nhập nào. Mục tiêu là thu thập càng nhiều thông tin càng tốt về mục tiêu — bao gồm hạ tầng, công nghệ sử dụng, điểm vào ứng dụng — mà không gây ảnh hưởng đến hệ thống. Thông tin thu được sẽ định hướng cho toàn bộ các giai đoạn kiểm thử về sau.
+    </div>
+
+    <div class="subcategory">
+      <h3>1.1 Trinh sát thụ động (Passive Reconnaissance)</h3>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Thu thập thông tin DNS và bản ghi tên miền <span class="severity sev-info">Thông tin</span></div>
+          <div class="check-desc">Thu thập tất cả các bản ghi DNS (A, AAAA, MX, TXT, NS, CNAME, SOA, SRV) liên quan tới tên miền chính và tên miền phụ. Thông tin này tiết lộ hạ tầng email, máy chủ tên, dịch vụ liên quan và đôi khi cả tên máy chủ nội bộ bị rò rỉ.</div>
+          <div class="check-detail"><strong>Cách thực hiện:</strong> Sử dụng các bản ghi TXT để tìm các bản ghi xác minh dịch vụ (Google, Microsoft, AWS), bản ghi SPF/DKIM/DMARC. Bản ghi MX tiết lộ nhà cung cấp email. Truy vấn nhiều máy chủ DNS để phát hiện sự khác biệt.</div>
+          <div class="check-tools"><code>dig</code><code>nslookup</code><code>host</code><code>dnsrecon</code><code>fierce</code><code>amass</code></div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Liệt kê tên miền phụ (Subdomain Enumeration) <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Phát hiện tất cả các tên miền phụ — bao gồm các môi trường staging, dev, test, admin, api, internal — vì các tên miền này thường có mức bảo mật yếu hơn so với tên miền sản xuất chính.</div>
+          <div class="check-detail"><strong>Phương pháp:</strong> Kết hợp brute-force từ điển, truy vấn Certificate Transparency Logs (crt.sh), DNS zone transfer, tìm kiếm Google dorking và các API như VirusTotal, SecurityTrails, Shodan. Kiểm tra cả wildcard DNS để tránh sai số.</div>
+          <div class="check-tools"><code>subfinder</code><code>amass</code><code>assetfinder</code><code>sublist3r</code><code>crt.sh</code><code>chaos</code></div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Tìm kiếm thông tin trong công cụ tìm kiếm (Google Dorking) <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Sử dụng các toán tử tìm kiếm nâng cao để khám phá tệp nhạy cảm bị lập chỉ mục công khai: tệp cấu hình, tệp sao lưu, log, mã nguồn rò rỉ, trang quản trị và thông tin xác thực.</div>
+          <div class="check-detail"><strong>Toán tử thường dùng:</strong> <code>site:</code>, <code>inurl:</code>, <code>intitle:</code>, <code>filetype:</code>, <code>cache:</code>, <code>ext:</code>. Ví dụ: <code>site:target.com filetype:env</code>, <code>site:target.com intitle:"index of"</code>, <code>site:target.com inurl:admin</code>. Tham khảo Google Hacking Database (GHDB).</div>
+          <div class="check-tools"><code>Google</code><code>Bing</code><code>DuckDuckGo</code><code>GHDB</code><code>recon-ng</code></div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Tìm kiếm rò rỉ thông tin trên GitHub/GitLab/Bitbucket <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Quét các kho lưu trữ mã nguồn công khai để tìm khóa API, mật khẩu, chuỗi kết nối cơ sở dữ liệu, khóa SSH, token nội bộ và mã nguồn nội bộ vô tình bị đẩy lên.</div>
+          <div class="check-detail"><strong>Mục tiêu tìm kiếm:</strong> tên miền, tên công ty, email nhân viên, đường dẫn nội bộ. Kiểm tra cả lịch sử commit (kể cả commit đã xóa) và tài khoản cá nhân của nhân viên. Đây là một trong những nguồn rò rỉ nghiêm trọng nhất trong thực tế.</div>
+          <div class="check-tools"><code>truffleHog</code><code>gitleaks</code><code>github-dorks</code><code>gitrob</code><code>shhgit</code></div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Khai thác Wayback Machine và Archive.org <span class="severity sev-low">Thấp</span></div>
+          <div class="check-desc">Truy xuất các phiên bản lịch sử của website để tìm các URL cũ, endpoint đã bị xóa nhưng vẫn hoạt động, các tham số ẩn và thông tin nhạy cảm trong các phiên bản trước.</div>
+          <div class="check-detail"><strong>Lợi ích:</strong> Phát hiện các API endpoint cũ vẫn còn nhưng không được bảo mật cập nhật, các tệp JavaScript với endpoint nội bộ, các trang quản trị bị ẩn nhưng chưa xóa khỏi máy chủ.</div>
+          <div class="check-tools"><code>waybackurls</code><code>gau</code><code>archive.org</code><code>commoncrawl</code></div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Phân tích thông tin Whois và đăng ký tên miền <span class="severity sev-info">Thông tin</span></div>
+          <div class="check-desc">Truy xuất thông tin đăng ký tên miền: chủ sở hữu, ngày hết hạn, máy chủ DNS, thông tin liên hệ kỹ thuật. Hữu ích cho social engineering và đánh giá mức độ chuyên nghiệp.</div>
+          <div class="check-tools"><code>whois</code><code>whoisxmlapi</code><code>domaintools</code></div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Sử dụng Shodan, Censys, ZoomEye <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Các công cụ tìm kiếm thiết bị Internet này lập chỉ mục các cổng mở, dịch vụ chạy, banner phần mềm, chứng chỉ SSL công khai. Có thể phát hiện các máy chủ ẩn, dịch vụ không nên public, lỗ hổng đã biết.</div>
+          <div class="check-detail"><strong>Truy vấn ví dụ:</strong> <code>org:"TenCongTy"</code>, <code>ssl:"target.com"</code>, <code>http.title:"login"</code>, <code>port:3306 country:VN</code>. Phát hiện các database, Redis, Elasticsearch bị mở public.</div>
+          <div class="check-tools"><code>shodan</code><code>censys</code><code>zoomeye</code><code>fofa</code></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subcategory">
+      <h3>1.2 Trinh sát chủ động (Active Reconnaissance)</h3>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Quét cổng và nhận diện dịch vụ <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Quét các cổng TCP/UDP mở trên máy chủ mục tiêu, nhận diện phiên bản dịch vụ chạy trên mỗi cổng. Phát hiện các dịch vụ không cần thiết hoặc có lỗ hổng đã biết (CVE).</div>
+          <div class="check-detail"><strong>Lưu ý:</strong> Quét full-port (1-65535), không chỉ top 1000. Sử dụng quét UDP cho các dịch vụ DNS, SNMP. Nhận diện banner cẩn thận vì có thể bị ngụy trang. Đối chiếu phiên bản với CVE database (NVD, ExploitDB).</div>
+          <div class="check-tools"><code>nmap</code><code>masscan</code><code>rustscan</code><code>naabu</code><code>unicornscan</code></div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Nhận diện máy chủ web và công nghệ web (Web Fingerprinting) <span class="severity sev-info">Thông tin</span></div>
+          <div class="check-desc">Xác định máy chủ web (Apache, Nginx, IIS), framework backend (Laravel, Django, Rails, Spring), CMS (WordPress, Drupal, Joomla), cơ sở dữ liệu, ngôn ngữ lập trình, thư viện JS, CDN, WAF.</div>
+          <div class="check-detail"><strong>Dấu hiệu nhận biết:</strong> HTTP Headers (Server, X-Powered-By), cookie tên (PHPSESSID, JSESSIONID, ASP.NET_SessionId), đường dẫn đặc trưng (/wp-admin, /administrator), comment HTML, biểu tượng favicon hash, lỗi mặc định.</div>
+          <div class="check-tools"><code>whatweb</code><code>wappalyzer</code><code>builtwith</code><code>nuclei</code><code>httpx</code></div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Nhận diện và bypass WAF/IPS/Load Balancer <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Xác định sự hiện diện của Web Application Firewall (Cloudflare, Akamai, AWS WAF, Imperva, F5), CDN, Load Balancer. Tìm cách đi vòng qua bằng cách truy cập trực tiếp IP gốc.</div>
+          <div class="check-detail"><strong>Kỹ thuật bypass:</strong> Tìm IP origin qua DNS lịch sử, tệp cấu hình email rò rỉ (header email), subdomain không qua CDN, dịch vụ Censys/Shodan với chứng chỉ SSL trùng. Kiểm tra kỹ thuật fragmentation, encoding để bypass rule WAF.</div>
+          <div class="check-tools"><code>wafw00f</code><code>cloudfail</code><code>cloudflair</code><code>cf-hero</code></div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Liệt kê tệp và thư mục (Directory/File Brute-forcing) <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Tìm kiếm các thư mục và tệp ẩn không được liên kết công khai: trang quản trị, tệp sao lưu (.bak, .old, .zip), tệp cấu hình (.env, web.config), API tài liệu (swagger.json), kho lưu trữ phiên bản (.git, .svn).</div>
+          <div class="check-detail"><strong>Từ điển khuyến nghị:</strong> SecLists (raft-large, common.txt), wordlist theo công nghệ phát hiện. Dùng nhiều phần mở rộng phù hợp với công nghệ (.php, .asp, .jsp, .json, .config). Phân tích mã trạng thái HTTP cẩn thận (200, 301, 302, 401, 403, 500).</div>
+          <div class="check-tools"><code>ffuf</code><code>gobuster</code><code>dirsearch</code><code>wfuzz</code><code>feroxbuster</code><code>dirbuster</code></div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Phân tích tệp robots.txt, sitemap.xml, security.txt <span class="severity sev-low">Thấp</span></div>
+          <div class="check-desc">Đọc các tệp meta tiêu chuẩn để khám phá đường dẫn quan trọng: robots.txt thường liệt kê các thư mục mà chủ sở hữu muốn ẩn khỏi công cụ tìm kiếm (đôi khi là admin, backup), sitemap.xml liệt kê toàn bộ URL đã biết.</div>
+          <div class="check-detail"><strong>Đường dẫn cần kiểm tra:</strong> <code>/robots.txt</code>, <code>/sitemap.xml</code>, <code>/.well-known/security.txt</code>, <code>/humans.txt</code>, <code>/crossdomain.xml</code>, <code>/clientaccesspolicy.xml</code>.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Lập sơ đồ ứng dụng (Application Mapping/Spidering) <span class="severity sev-info">Thông tin</span></div>
+          <div class="check-desc">Tạo bản đồ toàn bộ chức năng của ứng dụng: các tuyến đường (route), tham số, biểu mẫu, điểm cuối API, vai trò người dùng. Đây là cơ sở để có chiến lược kiểm thử mục tiêu.</div>
+          <div class="check-detail"><strong>Các chức năng cần lưu ý:</strong> đăng ký, đăng nhập, quên mật khẩu, đổi mật khẩu, hồ sơ người dùng, tải lên tệp, tìm kiếm, giỏ hàng, thanh toán, xuất dữ liệu, gửi email, tích hợp bên thứ ba, webhook, GraphQL/REST API.</div>
+          <div class="check-tools"><code>Burp Suite</code><code>OWASP ZAP</code><code>Katana</code><code>hakrawler</code><code>gospider</code></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2. CẤU HÌNH VÀ TRIỂN KHAI ============ -->
+<section class="category" id="cat-2">
+  <div class="category-header" onclick="toggleCategory(this)">
+    <h2><span class="num-badge">02</span><span class="icon">⚙️</span>Kiểm thử cấu hình và triển khai (Configuration &amp; Deployment Management)</h2>
+    <div class="category-meta"><span class="cat-progress">0/0</span><span class="toggle-icon">▼</span></div>
+  </div>
+  <div class="category-body">
+    <div class="category-intro">
+      Cấu hình sai (misconfiguration) là một trong những nguyên nhân phổ biến nhất gây ra các sự cố bảo mật, được liệt kê trong OWASP Top 10 (A05:2021). Hạng mục này tập trung vào việc kiểm tra cấu hình máy chủ, framework, hạ tầng cloud và các thành phần triển khai.
+    </div>
+
+    <div class="subcategory">
+      <h3>2.1 Cấu hình máy chủ web và ứng dụng</h3>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Kiểm tra phiên bản phần mềm và bản vá lỗi <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Xác định phiên bản chính xác của tất cả các thành phần (HTTP server, application server, database, framework, thư viện) và đối chiếu với cơ sở dữ liệu CVE để phát hiện lỗ hổng đã biết.</div>
+          <div class="check-detail"><strong>Lý do:</strong> Phiên bản cũ thường có CVE đã công bố và được khai thác công khai. Phần lớn các vụ tấn công lớn (Equifax — Apache Struts) bắt nguồn từ việc không vá bản vá. Kiểm tra cả các thành phần phụ thuộc tạm thời (transitive dependencies).</div>
+          <div class="check-tools"><code>nmap -sV</code><code>nuclei</code><code>retire.js</code><code>OWASP Dependency-Check</code><code>snyk</code></div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Kiểm tra phương thức HTTP được hỗ trợ <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Xác định các phương thức HTTP được phép trên mỗi endpoint (GET, POST, PUT, DELETE, PATCH, OPTIONS, TRACE, CONNECT, HEAD). Một số phương thức nguy hiểm có thể bị khai thác.</div>
+          <div class="check-detail"><strong>Mối nguy:</strong> TRACE/TRACK có thể dẫn tới Cross-Site Tracing (XST). PUT/DELETE bật trên server có thể cho phép upload/xóa tệp. Kiểm tra method override qua header (<code>X-HTTP-Method-Override</code>) để bypass kiểm soát truy cập.</div>
+          <div class="check-tools"><code>nmap --script http-methods</code><code>curl -X OPTIONS</code><code>davtest</code></div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Kiểm tra liệt kê thư mục (Directory Listing) <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Xác định các thư mục cho phép liệt kê nội dung khi không có tệp index. Có thể tiết lộ tệp nhạy cảm như sao lưu, log, tệp tạm.</div>
+          <div class="check-detail"><strong>Cách thử:</strong> Truy cập các đường dẫn không có index (<code>/images/</code>, <code>/uploads/</code>, <code>/backup/</code>, <code>/css/</code>) và xem có hiển thị danh sách tệp không. Tắt <code>autoindex</code> trong nginx và <code>Options -Indexes</code> trong Apache.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Kiểm tra tệp sao lưu, tệp cũ, tệp tạm <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Tìm các tệp sao lưu vô tình để lại trên máy chủ: <code>.bak</code>, <code>.old</code>, <code>.swp</code>, <code>~</code>, <code>.tar.gz</code>, <code>.zip</code>, <code>config.php.bak</code>, <code>.DS_Store</code>, <code>Thumbs.db</code>.</div>
+          <div class="check-detail"><strong>Hậu quả:</strong> Có thể tiết lộ mã nguồn (lộ logic, khóa bí mật), thông tin cấu hình (chuỗi DB), dữ liệu khách hàng. Một số editor (vim) tạo tệp <code>.swp</code> tự động.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Kiểm tra tệp metadata và kho mã nguồn rò rỉ <span class="severity sev-critical">Nghiêm trọng</span></div>
+          <div class="check-desc">Phát hiện thư mục <code>.git/</code>, <code>.svn/</code>, <code>.hg/</code>, <code>.bzr/</code>, <code>.env</code>, <code>composer.lock</code>, <code>package.json</code> bị lộ ra public, có thể cho phép tải toàn bộ mã nguồn về.</div>
+          <div class="check-detail"><strong>Khai thác:</strong> Truy cập <code>/.git/HEAD</code>, <code>/.git/config</code>, sau đó dùng git-dumper để clone toàn bộ kho. Đây là lỗ hổng cực kỳ phổ biến và nghiêm trọng — toàn bộ code và lịch sử commit (kể cả secret cũ) bị rò rỉ.</div>
+          <div class="check-tools"><code>git-dumper</code><code>gitdumper</code><code>DotGit (extension)</code></div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Kiểm tra trang quản trị và giao diện quản lý <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Tìm các giao diện quản trị mặc định: <code>/admin</code>, <code>/manager</code>, <code>/wp-admin</code>, <code>/phpmyadmin</code>, <code>/cpanel</code>, <code>/console</code>, <code>/jmx-console</code>. Kiểm tra xem có ràng buộc IP hay không, có thông tin đăng nhập mặc định không.</div>
+          <div class="check-detail"><strong>Quản trị nội bộ:</strong> Tomcat Manager, JBoss JMX, Jenkins, Kibana, Grafana, RabbitMQ, Redis Commander — thường được triển khai mà không nghĩ rằng sẽ public ra Internet.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Kiểm tra thông tin xác thực mặc định <span class="severity sev-critical">Nghiêm trọng</span></div>
+          <div class="check-desc">Thử đăng nhập các tài khoản mặc định của thiết bị, ứng dụng, framework: admin/admin, root/root, tomcat/tomcat, jenkins/jenkins, các tài khoản demo/test/guest.</div>
+          <div class="check-detail"><strong>Tham khảo:</strong> SecLists/Passwords/Default-Credentials, danh sách CIRT.net. Kiểm tra cả router, switch, IoT, máy in, camera IP — thường ít được thay đổi.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subcategory">
+      <h3>2.2 Bảo mật giao thức và kênh truyền</h3>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Kiểm tra cấu hình SSL/TLS <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Đánh giá toàn diện cấu hình mã hóa: phiên bản giao thức (chỉ TLS 1.2/1.3), bộ thuật toán mã hóa (cipher suite), độ dài khóa, chứng chỉ (CN, SAN, hết hạn, chuỗi tin cậy), Forward Secrecy, OCSP Stapling, HSTS.</div>
+          <div class="check-detail"><strong>Vô hiệu hóa:</strong> SSLv2, SSLv3, TLS 1.0, TLS 1.1, RC4, DES, 3DES, MD5, SHA1, các cipher EXPORT/NULL/anonymous. Kiểm tra các lỗ hổng đã biết: Heartbleed, POODLE, BEAST, CRIME, BREACH, Logjam, FREAK, ROBOT, Lucky13, Sweet32, Raccoon.</div>
+          <div class="check-tools"><code>testssl.sh</code><code>sslyze</code><code>nmap --script ssl-*</code><code>SSL Labs</code><code>openssl s_client</code></div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Kiểm tra HTTP Strict Transport Security (HSTS) <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Xác minh header <code>Strict-Transport-Security</code> được cấu hình đúng với <code>max-age</code> đủ dài (≥ 1 năm), <code>includeSubDomains</code>, và preload nếu phù hợp.</div>
+          <div class="check-detail"><strong>Tác dụng:</strong> Bắt trình duyệt luôn dùng HTTPS, ngăn tấn công SSL stripping (man-in-the-middle hạ cấp xuống HTTP). Header chỉ có hiệu lực sau lần truy cập đầu qua HTTPS — preload list của Chrome đảm bảo ngay từ lần đầu.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Kiểm tra chuyển hướng từ HTTP sang HTTPS <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Đảm bảo mọi yêu cầu HTTP được chuyển hướng (301/308) sang HTTPS ở mọi cấp tên miền và đường dẫn. Cookies bảo mật phải được đặt cờ <code>Secure</code> và <code>HttpOnly</code>.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Kiểm tra Mixed Content <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Phát hiện các tài nguyên tải qua HTTP trong trang HTTPS (hình ảnh, CSS, JavaScript). Mixed content vô hiệu hóa lợi ích của HTTPS và có thể bị thay thế bởi attacker MITM.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subcategory">
+      <h3>2.3 Cấu hình Cloud, Container, Orchestration</h3>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Kiểm tra S3 buckets, Azure Blobs, GCS buckets <span class="severity sev-critical">Nghiêm trọng</span></div>
+          <div class="check-desc">Tìm các bucket lưu trữ object storage được cấu hình public (ListObjects, GetObject công khai). Có thể chứa dữ liệu khách hàng, sao lưu DB, ảnh riêng tư, mã nguồn.</div>
+          <div class="check-detail"><strong>Cách tìm:</strong> dò tên bucket theo tên công ty/sản phẩm (target-prod, target-backup, target-uploads), dùng các từ điển. Kiểm tra cả ACL bucket và ACL object level. Bật S3 Block Public Access, dùng IAM thay vì ACL.</div>
+          <div class="check-tools"><code>s3scanner</code><code>cloud_enum</code><code>AWSBucketDump</code><code>gcpbucketbrute</code></div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Kiểm tra Cloud Metadata Service <span class="severity sev-critical">Nghiêm trọng</span></div>
+          <div class="check-desc">Trên các môi trường cloud (AWS, Azure, GCP), kiểm tra khả năng tiếp cận endpoint metadata (<code>169.254.169.254</code>) qua các lỗ hổng SSRF, để đánh cắp IAM credentials, instance role.</div>
+          <div class="check-detail"><strong>AWS:</strong> Bắt buộc IMDSv2 (yêu cầu PUT để lấy token). <strong>GCP/Azure:</strong> yêu cầu header <code>Metadata: true</code>. Hạn chế quyền của instance role theo nguyên tắc least privilege.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Kiểm tra cấu hình Docker và Kubernetes <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Đánh giá Dockerfile (image base, secret, user root), Docker socket exposed, Kubernetes API/Dashboard public, kubelet không xác thực, RBAC quá rộng, secret lưu plaintext, network policy thiếu.</div>
+          <div class="check-tools"><code>kube-bench</code><code>kube-hunter</code><code>trivy</code><code>docker bench</code></div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Kiểm tra CI/CD pipeline và secrets <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Kiểm tra cấu hình GitHub Actions, GitLab CI, Jenkins về quyền runner, lưu trữ secrets, cho phép pull request từ fork chạy với secrets, lỗ hổng injection trong workflow.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subcategory">
+      <h3>2.4 HTTP Security Headers</h3>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Content Security Policy (CSP) <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Kiểm tra header CSP có chặt chẽ, không có <code>unsafe-inline</code>, <code>unsafe-eval</code>, không có wildcard <code>*</code>, có nonce/hash cho inline script. CSP là lớp phòng thủ quan trọng chống XSS.</div>
+          <div class="check-detail"><strong>Bypass thường gặp:</strong> JSONP endpoints trong allowlist, các CDN cho phép tải bất kỳ JS, framework dùng eval (Angular, Vue trong dev mode). Dùng <code>Content-Security-Policy-Report-Only</code> trước khi enforce.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">X-Frame-Options / frame-ancestors <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Kiểm tra các header chống Clickjacking: <code>X-Frame-Options: DENY/SAMEORIGIN</code> hoặc CSP <code>frame-ancestors</code>.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">X-Content-Type-Options: nosniff <span class="severity sev-low">Thấp</span></div>
+          <div class="check-desc">Ngăn trình duyệt suy đoán MIME type, giúp giảm rủi ro XSS qua tệp upload.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Referrer-Policy <span class="severity sev-low">Thấp</span></div>
+          <div class="check-desc">Kiểm soát thông tin referrer gửi đi, tránh rò rỉ URL nội bộ. Khuyến nghị: <code>strict-origin-when-cross-origin</code> hoặc <code>no-referrer</code>.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Permissions-Policy / Feature-Policy <span class="severity sev-low">Thấp</span></div>
+          <div class="check-desc">Kiểm soát các tính năng trình duyệt được phép sử dụng (camera, microphone, geolocation, payment, fullscreen).</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Cross-Origin Headers (CORP, COOP, COEP) <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Cross-Origin-Resource-Policy, Cross-Origin-Opener-Policy, Cross-Origin-Embedder-Policy — bảo vệ chống Spectre, leak thông tin qua window opener.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Loại bỏ các header tiết lộ thông tin <span class="severity sev-info">Thông tin</span></div>
+          <div class="check-desc">Loại bỏ hoặc làm mờ các header tiết lộ công nghệ: <code>Server</code>, <code>X-Powered-By</code>, <code>X-AspNet-Version</code>, <code>X-Generator</code>.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3. QUẢN LÝ DANH TÍNH ============ -->
+<section class="category" id="cat-3">
+  <div class="category-header" onclick="toggleCategory(this)">
+    <h2><span class="num-badge">03</span><span class="icon">👤</span>Quản lý danh tính (Identity Management)</h2>
+    <div class="category-meta"><span class="cat-progress">0/0</span><span class="toggle-icon">▼</span></div>
+  </div>
+  <div class="category-body">
+    <div class="category-intro">
+      Quản lý danh tính đảm bảo mỗi người dùng được nhận diện duy nhất, các vai trò được định nghĩa rõ ràng, và quy trình tạo/sửa/xóa tài khoản an toàn. Lỗ hổng ở giai đoạn này thường dẫn tới chiếm tài khoản và leo thang đặc quyền.
+    </div>
+
+    <div class="subcategory">
+      <h3>3.1 Quy trình đăng ký tài khoản</h3>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Liệt kê người dùng (User Enumeration) <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Kiểm tra xem ứng dụng có tiết lộ sự tồn tại của tài khoản qua thông báo lỗi khác nhau ở trang đăng ký, đăng nhập, quên mật khẩu hay không.</div>
+          <div class="check-detail"><strong>Dấu hiệu:</strong> "Email đã tồn tại" vs "Email không tồn tại", thời gian phản hồi khác nhau, mã trạng thái HTTP khác nhau, độ dài phản hồi khác nhau. Khắc phục: trả về thông báo chung chung, gửi email xác nhận cho cả hai trường hợp.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Kiểm tra ràng buộc đăng ký (rate limit, captcha) <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Đánh giá khả năng tự động tạo hàng loạt tài khoản — có thể bị lạm dụng cho spam, fraud, abuse credit miễn phí.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Xác thực email/SĐT khi đăng ký <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Kiểm tra cơ chế xác thực email/SĐT có thật sự được yêu cầu, mã xác thực đủ ngẫu nhiên, có hết hạn, không bị brute force, không thể bypass.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Đăng ký với email tạm thời / disposable <span class="severity sev-low">Thấp</span></div>
+          <div class="check-desc">Xác định xem ứng dụng có chặn các tên miền email tạm thời (Mailinator, 10minutemail, Guerrilla Mail) không, đặc biệt với các dịch vụ có ưu đãi cho người dùng mới.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subcategory">
+      <h3>3.2 Vai trò và quyền hạn</h3>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Định nghĩa vai trò rõ ràng (Role Definition) <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Xác minh có ma trận vai trò/quyền (RBAC matrix) rõ ràng giữa user, premium, moderator, admin, super-admin và mỗi vai trò chỉ có quyền tối thiểu cần thiết (least privilege).</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Kiểm tra cách lưu trữ vai trò <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Đảm bảo thông tin vai trò không được lưu ở client (cookie, localStorage, hidden field) mà luôn được kiểm tra ở server với mỗi request. Vai trò trong JWT phải được ký và xác minh đúng.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Quy trình cấp quyền và thu hồi quyền <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Kiểm tra quy trình thay đổi vai trò có audit log, có yêu cầu xác thực bổ sung, và quyền được thu hồi ngay lập tức (không chờ session hết hạn).</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 4. XÁC THỰC ============ -->
+<section class="category" id="cat-4">
+  <div class="category-header" onclick="toggleCategory(this)">
+    <h2><span class="num-badge">04</span><span class="icon">🔐</span>Kiểm thử cơ chế xác thực (Authentication)</h2>
+    <div class="category-meta"><span class="cat-progress">0/0</span><span class="toggle-icon">▼</span></div>
+  </div>
+  <div class="category-body">
+    <div class="category-intro">
+      Xác thực là cánh cửa đầu tiên bảo vệ tài khoản người dùng. Lỗ hổng xác thực — Broken Authentication — xếp hạng A07 trong OWASP Top 10. Kiểm thử cần bao phủ toàn bộ vòng đời xác thực, từ đăng nhập, ghi nhớ, đến khôi phục mật khẩu.
+    </div>
+
+    <div class="subcategory">
+      <h3>4.1 Đăng nhập</h3>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Truyền thông tin đăng nhập qua kênh không mã hóa <span class="severity sev-critical">Nghiêm trọng</span></div>
+          <div class="check-desc">Đảm bảo username/password chỉ truyền qua HTTPS, không qua URL (GET parameter), không lưu trong access log.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Brute Force và Credential Stuffing <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Kiểm tra cơ chế chống dò mật khẩu: rate limiting theo IP, theo tài khoản, theo session; CAPTCHA sau N lần thất bại; khóa tài khoản tạm thời; thông báo qua email khi nhiều lần đăng nhập sai.</div>
+          <div class="check-detail"><strong>Phân biệt:</strong> Brute force = đoán password cho 1 user. Credential stuffing = thử cặp user/pass đã rò rỉ ở dịch vụ khác. Password spraying = thử 1 password phổ biến cho nhiều user (bypass rate limit theo user).</div>
+          <div class="check-tools"><code>hydra</code><code>medusa</code><code>patator</code><code>Burp Intruder</code><code>ffuf</code></div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Chính sách mật khẩu mạnh <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Kiểm tra yêu cầu mật khẩu: độ dài tối thiểu (≥ 12 ký tự khuyến nghị), không phải mật khẩu trong danh sách rò rỉ phổ biến (HaveIBeenPwned), không phải pattern (123456, password, qwerty).</div>
+          <div class="check-detail"><strong>NIST 800-63B:</strong> Không bắt buộc đổi mật khẩu định kỳ trừ khi nghi ngờ bị lộ. Không bắt buộc ký tự đặc biệt phức tạp. Tập trung vào độ dài và kiểm tra với danh sách bị lộ.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Cách lưu trữ mật khẩu <span class="severity sev-critical">Nghiêm trọng</span></div>
+          <div class="check-desc">Mật khẩu phải được hash bằng thuật toán chậm chuyên dụng: bcrypt, scrypt, Argon2id, PBKDF2 với cost cao. Không bao giờ lưu plaintext, không dùng MD5/SHA1/SHA256 trần.</div>
+          <div class="check-detail"><strong>Argon2id</strong> là khuyến nghị mới nhất của OWASP. <strong>bcrypt</strong> với cost ≥ 10 vẫn được chấp nhận. Mỗi mật khẩu phải có salt riêng. Pepper (khóa bí mật server-side) nên dùng cho lớp bảo vệ thêm.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Thông báo lỗi đăng nhập <span class="severity sev-low">Thấp</span></div>
+          <div class="check-desc">Thông báo phải chung chung ("Tên đăng nhập hoặc mật khẩu không đúng") để không tiết lộ tài khoản nào tồn tại.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Tính năng "Ghi nhớ đăng nhập" <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Kiểm tra remember-me token: được tạo ngẫu nhiên đủ dài, lưu hash trong DB, có hạn dài nhưng có thể thu hồi, được kiểm tra cùng IP/user-agent fingerprint nếu nhạy cảm.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">CAPTCHA và bảo vệ bot <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">CAPTCHA không được kiểm tra ở phía client, không thể bypass bằng cách gửi flag thành công, có chống tấn công tự động (reCAPTCHA, hCaptcha, Turnstile).</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subcategory">
+      <h3>4.2 Đa yếu tố (MFA / 2FA)</h3>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Hỗ trợ và bắt buộc MFA <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Kiểm tra hỗ trợ TOTP (Google Authenticator), WebAuthn/FIDO2 (passkey), SMS (kém an toàn nhất do SIM swap), email. Bắt buộc MFA cho tài khoản admin và các thao tác nhạy cảm.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Bypass MFA <span class="severity sev-critical">Nghiêm trọng</span></div>
+          <div class="check-desc">Thử các kỹ thuật bypass: bỏ qua bước MFA bằng cách thay đổi response, thử endpoint khác bỏ qua MFA, sử dụng remember device không xác minh, race condition giữa các bước, replay mã OTP.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Brute force mã OTP <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Mã OTP 6 chữ số chỉ có 1 triệu khả năng. Phải có rate limit, giới hạn số lần thử, thời gian hết hạn ngắn (30-60s cho TOTP, 5-10 phút cho mã email/SMS).</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Backup codes và recovery <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Backup codes được tạo ngẫu nhiên đủ dài, hash trước khi lưu, mỗi mã chỉ dùng được 1 lần, có thông báo khi sử dụng.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subcategory">
+      <h3>4.3 Khôi phục mật khẩu</h3>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Quy trình quên mật khẩu <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Kiểm tra: token reset đủ ngẫu nhiên (≥ 32 byte), hết hạn nhanh (15 phút - 1 giờ), chỉ dùng được 1 lần, gửi qua email đã đăng ký, không tiết lộ tài khoản tồn tại trong response.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Host Header Injection trong link reset <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Kiểm tra ứng dụng có dùng giá trị header <code>Host</code> để tạo URL reset không. Attacker có thể chèn host của mình để gửi link tới email victim, khi victim click sẽ leak token.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Câu hỏi bảo mật <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Tránh dùng câu hỏi bảo mật như cơ chế chính. Nếu dùng, đáp án phải hash, không tiết lộ qua thông báo lỗi, không dễ đoán từ thông tin công khai.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Thông báo qua email khi đổi mật khẩu <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Mỗi lần đổi/đặt lại mật khẩu phải gửi email thông báo cho người dùng để họ kịp phát hiện chiếm tài khoản.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subcategory">
+      <h3>4.4 Đăng nhập một lần (SSO/OAuth/OIDC/SAML)</h3>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">OAuth 2.0 Redirect URI <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Kiểm tra <code>redirect_uri</code> được so khớp tuyệt đối (whitelist), không cho phép wildcard hoặc subdomain mở. Open Redirect ở đây dẫn tới đánh cắp authorization code/token.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">CSRF trong OAuth flow (state parameter) <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Bắt buộc dùng tham số <code>state</code> ngẫu nhiên để chống CSRF. Server phải xác minh state khi nhận callback. Thiếu state có thể dẫn tới account fixation.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">PKCE cho public client <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Mọi client public (SPA, mobile) phải dùng PKCE (code_challenge/code_verifier) để chống đánh cắp authorization code.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">SAML XML Signature Wrapping (XSW) <span class="severity sev-critical">Nghiêm trọng</span></div>
+          <div class="check-desc">Kiểm tra triển khai SAML có verify chữ ký đúng phần XML không, có chống XSW attack không (chèn assertion mới sau assertion đã ký).</div>
+          <div class="check-tools"><code>SAMLRaider</code><code>SAML Burp extension</code></div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Account takeover qua liên kết tài khoản <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Nếu app cho phép liên kết account local với account social, kiểm tra: cùng email tự động merge có an toàn không (email chưa verify), unverified email từ Google bypass.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 5. PHÂN QUYỀN ============ -->
+<section class="category" id="cat-5">
+  <div class="category-header" onclick="toggleCategory(this)">
+    <h2><span class="num-badge">05</span><span class="icon">🔑</span>Kiểm thử phân quyền (Authorization)</h2>
+    <div class="category-meta"><span class="cat-progress">0/0</span><span class="toggle-icon">▼</span></div>
+  </div>
+  <div class="category-body">
+    <div class="category-intro">
+      Broken Access Control là lỗi #1 trong OWASP Top 10 2021. Kiểm thử phân quyền cần đảm bảo người dùng chỉ truy cập được dữ liệu và chức năng được phép, theo chiều ngang (cùng cấp), chiều dọc (cấp cao hơn) và bối cảnh (context-based).
+    </div>
+
+    <div class="subcategory">
+      <h3>5.1 Kiểm soát truy cập</h3>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Insecure Direct Object Reference (IDOR) <span class="severity sev-critical">Nghiêm trọng</span></div>
+          <div class="check-desc">Thay đổi ID trong URL, body, header để truy cập dữ liệu người khác: <code>/api/user/123</code> → <code>/api/user/124</code>, <code>?invoice_id=A001</code> → <code>?invoice_id=A002</code>. Kiểm tra cả thao tác đọc, sửa, xóa.</div>
+          <div class="check-detail"><strong>Cách kiểm thử:</strong> Tạo 2 tài khoản A và B. Dùng B để thực hiện thao tác trên dữ liệu của A. Kiểm tra mọi endpoint nhận ID. Đặc biệt nguy hiểm với UUID có thể đoán (sequential UUID v1).</div>
+          <div class="check-tools"><code>Burp Autorize</code><code>AuthMatrix</code><code>Authz</code></div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Leo thang đặc quyền chiều dọc (Vertical Privilege Escalation) <span class="severity sev-critical">Nghiêm trọng</span></div>
+          <div class="check-desc">Thử truy cập các endpoint admin khi đăng nhập user thường: <code>/admin/*</code>, <code>/api/admin/*</code>, các tham số như <code>?role=admin</code>, <code>?is_admin=true</code>, mass assignment trên trường role.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Leo thang đặc quyền chiều ngang (Horizontal) <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Truy cập dữ liệu của user khác cùng cấp. Bao gồm cả truy cập theo tenant trong multi-tenant SaaS — user của tenant A xem dữ liệu tenant B.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Forced Browsing <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Truy cập trực tiếp các URL chức năng mà không qua giao diện chính: trang admin không link, API không công khai, trang nội bộ. Kiểm soát truy cập phải ở mỗi endpoint, không chỉ ẩn link.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Bypass kiểm soát truy cập qua HTTP method <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Endpoint chặn POST nhưng cho phép GET (hoặc ngược lại). Thử PUT/PATCH/DELETE/OPTIONS/HEAD trên endpoint chỉ kiểm tra method GET/POST.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Bypass qua header <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Thử các header bypass: <code>X-Original-URL</code>, <code>X-Rewrite-URL</code>, <code>X-Forwarded-For: 127.0.0.1</code>, <code>X-Real-IP</code>, <code>X-Custom-IP-Authorization</code>, <code>Referer</code> giả mạo nội bộ.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Bypass qua URL encoding/case <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Thử encoding khác nhau để bypass route: <code>/admin</code> vs <code>/Admin</code> vs <code>/admin%20</code> vs <code>/admin/</code> vs <code>/admin/.</code> vs <code>/%2Fadmin</code> vs URL double encode.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Mass Assignment / Parameter Pollution <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Gán giá trị cho các trường nhạy cảm trong body request mà server không lọc: <code>{"username":"x","role":"admin","balance":1000000}</code>. Kiểm tra ORM tự động bind property.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subcategory">
+      <h3>5.2 Phân quyền theo ngữ cảnh</h3>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Quyền truy cập dựa trên trạng thái <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Kiểm tra các thao tác chỉ được phép trong trạng thái nhất định: hủy đơn hàng đã thanh toán, sửa bài đã duyệt, gia hạn gói đã hết hạn.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Phân quyền theo thời gian/IP/thiết bị <span class="severity sev-low">Thấp</span></div>
+          <div class="check-desc">Đối với chức năng nhạy cảm, kiểm tra ràng buộc context: chỉ trong giờ làm việc, chỉ từ IP công ty, chỉ trên thiết bị đã đăng ký.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6. QUẢN LÝ PHIÊN ============ -->
+<section class="category" id="cat-6">
+  <div class="category-header" onclick="toggleCategory(this)">
+    <h2><span class="num-badge">06</span><span class="icon">🍪</span>Quản lý phiên (Session Management)</h2>
+    <div class="category-meta"><span class="cat-progress">0/0</span><span class="toggle-icon">▼</span></div>
+  </div>
+  <div class="category-body">
+    <div class="category-intro">
+      Phiên là cầu nối duy trì trạng thái xác thực giữa các request. Kiểm thử phải đảm bảo session token không thể đoán, không bị đánh cắp, được hủy đúng lúc và bảo vệ trước các tấn công fixation, hijacking.
+    </div>
+
+    <div class="subcategory">
+      <h3>6.1 Token phiên</h3>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Tính ngẫu nhiên của Session ID <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Session ID phải đủ dài (≥ 128 bit entropy), tạo từ CSPRNG (không phải Math.random hay rand()), không chứa thông tin có thể đoán được (user ID, timestamp).</div>
+          <div class="check-tools"><code>Burp Sequencer</code></div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Cookie attributes (Secure, HttpOnly, SameSite) <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Cookie session phải có: <code>Secure</code> (chỉ qua HTTPS), <code>HttpOnly</code> (chống XSS đọc cookie), <code>SameSite=Lax/Strict</code> (chống CSRF), <code>Path</code> hợp lý, <code>Domain</code> chính xác.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Session Fixation <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Kiểm tra session ID có được tái tạo (regenerate) sau khi đăng nhập thành công không. Nếu không, attacker có thể ép victim dùng session ID của attacker, sau đó dùng cùng ID để chiếm phiên.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Vô hiệu hóa session ở server (Logout) <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Khi đăng xuất, session phải được hủy ở server-side, không chỉ xóa cookie ở client. Token cũ phải không thể tiếp tục dùng được. Đặc biệt quan trọng với JWT (cần blacklist hoặc rotation).</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Hết hạn session (timeout) <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Kiểm tra: idle timeout (15-30 phút cho ứng dụng nhạy cảm), absolute timeout (8-12 giờ), hết hạn cookie. Cảnh báo người dùng trước khi timeout.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Đa phiên đồng thời <span class="severity sev-low">Thấp</span></div>
+          <div class="check-desc">Cho phép xem và thu hồi các phiên đang hoạt động. Cảnh báo khi đăng nhập từ thiết bị/IP mới. Tùy chọn hạn chế chỉ 1 phiên cùng lúc.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subcategory">
+      <h3>6.2 JSON Web Token (JWT)</h3>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Algorithm "none" attack <span class="severity sev-critical">Nghiêm trọng</span></div>
+          <div class="check-desc">Thử thay header alg thành "none" và xóa chữ ký — một số thư viện JWT cũ chấp nhận. Đảm bảo server enforce thuật toán cụ thể (whitelist).</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Algorithm Confusion (RS256 → HS256) <span class="severity sev-critical">Nghiêm trọng</span></div>
+          <div class="check-desc">Đổi alg từ RS256 sang HS256 và ký bằng public key — server xác minh dùng public key như shared secret nếu không strict.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Khóa ký yếu / brute force HMAC <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Kiểm tra HMAC secret có đủ dài và ngẫu nhiên không. Khóa yếu (như "secret", "key") có thể brute force trong vài phút.</div>
+          <div class="check-tools"><code>jwt_tool</code><code>hashcat -m 16500</code><code>jwtcrack</code></div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Header injection (jku, jwk, kid, x5u, x5c) <span class="severity sev-critical">Nghiêm trọng</span></div>
+          <div class="check-desc">Các trường <code>jku</code> và <code>jwk</code> có thể bị lợi dụng để chỉ tới khóa của attacker. <code>kid</code> có thể bị SQL injection hoặc path traversal.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Thông tin nhạy cảm trong payload <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">JWT chỉ được mã hóa base64, ai cũng đọc được. Không lưu password, PII nhạy cảm trong claim.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Refresh token rotation <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Refresh token phải rotate mỗi lần dùng, có thể thu hồi, lưu trong DB, phát hiện reuse (dấu hiệu đánh cắp). Thời hạn tách biệt với access token.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Xác minh các claim bắt buộc <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Server phải kiểm tra: <code>exp</code> (hết hạn), <code>iat</code> (thời điểm phát hành), <code>nbf</code> (not before), <code>iss</code> (issuer), <code>aud</code> (audience).</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 7. KIỂM TRA ĐẦU VÀO ============ -->
+<section class="category" id="cat-7">
+  <div class="category-header" onclick="toggleCategory(this)">
+    <h2><span class="num-badge">07</span><span class="icon">💉</span>Kiểm tra đầu vào và tấn công injection (Input Validation)</h2>
+    <div class="category-meta"><span class="cat-progress">0/0</span><span class="toggle-icon">▼</span></div>
+  </div>
+  <div class="category-body">
+    <div class="category-intro">
+      Injection xếp #3 trong OWASP Top 10 2021. Mọi đầu vào không tin cậy phải được validate, sanitize, escape phù hợp với ngữ cảnh sử dụng (SQL, OS command, HTML, JavaScript, XML, LDAP, NoSQL...).
+    </div>
+
+    <div class="subcategory">
+      <h3>7.1 SQL Injection</h3>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">In-band SQLi (Error-based, Union-based) <span class="severity sev-critical">Nghiêm trọng</span></div>
+          <div class="check-desc">Chèn payload gây lỗi SQL hiển thị ra response, hoặc dùng UNION SELECT để lấy dữ liệu. Kiểm tra mọi điểm đầu vào: GET, POST, header, cookie, JSON.</div>
+          <div class="check-detail"><strong>Payload thử:</strong> <code>' OR '1'='1</code>, <code>" OR ""="</code>, <code>' AND SLEEP(5)--</code>, <code>' UNION SELECT NULL,NULL--</code>. Chú ý cú pháp khác nhau giữa MySQL, PostgreSQL, MSSQL, Oracle.</div>
+          <div class="check-tools"><code>sqlmap</code><code>NoSQLMap</code><code>Burp scanner</code></div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Blind SQLi (Boolean-based, Time-based) <span class="severity sev-critical">Nghiêm trọng</span></div>
+          <div class="check-desc">Khi không có lỗi/output, dò qua chênh lệch response (true/false) hoặc thời gian phản hồi (SLEEP, BENCHMARK, WAITFOR DELAY).</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Out-of-band SQLi (DNS, HTTP) <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Khi không có in-band và blind quá chậm, dùng các function tạo kết nối ra ngoài: <code>load_file</code>, <code>xp_dirtree</code>, <code>UTL_HTTP</code>. Cần OOB server (Burp Collaborator).</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Second-order SQLi <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Payload được lưu vào DB ở request 1, được thực thi không an toàn ở request 2 (xuất báo cáo, sửa hồ sơ). Khó phát hiện hơn first-order.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">NoSQL Injection (MongoDB, CouchDB) <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Payload đặc thù NoSQL: <code>{"username":{"$ne":null},"password":{"$ne":null}}</code>, <code>{"$where":"this.x==1"}</code>, <code>{"$regex":".*"}</code>. JSON injection trong body.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subcategory">
+      <h3>7.2 Cross-Site Scripting (XSS)</h3>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Reflected XSS <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Payload gửi trong request và phản hồi ngay trong response (search, error message). Cần social engineering để victim click link.</div>
+          <div class="check-detail"><strong>Payload cơ bản:</strong> <code>&lt;script&gt;alert(1)&lt;/script&gt;</code>, <code>"&gt;&lt;svg onload=alert(1)&gt;</code>, <code>javascript:alert(1)</code>. Kiểm tra mọi context: HTML body, attribute, JS string, CSS, URL, JSON.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Stored XSS (Persistent) <span class="severity sev-critical">Nghiêm trọng</span></div>
+          <div class="check-desc">Payload lưu trong DB và hiển thị lại cho mọi user (comment, profile, message, name). Mức độ nghiêm trọng cao vì tự động khai thác mọi nạn nhân.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">DOM-based XSS <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Lỗ hổng nằm hoàn toàn trong JavaScript phía client: <code>document.write</code>, <code>innerHTML</code>, <code>eval</code>, <code>setTimeout(string)</code> với input từ <code>location.hash</code>, <code>postMessage</code>.</div>
+          <div class="check-tools"><code>DOM Invader (Burp)</code></div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Blind XSS <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Payload thực thi trong môi trường không truy cập trực tiếp (admin panel, log viewer). Cần callback ngoài.</div>
+          <div class="check-tools"><code>XSS Hunter</code></div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">XSS qua tệp upload <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Upload tệp HTML/SVG/PDF chứa script. SVG đặc biệt nguy hiểm vì là XML có thể chứa &lt;script&gt;.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Bypass filter và WAF <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Thử các kỹ thuật bypass: case mixing, encoding (HTML entity, URL, Unicode), thẻ ít gặp (svg, math, details, marquee), sự kiện đặc biệt (onpointerenter), JavaScript functions thay thế (setTimeout, Function constructor).</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subcategory">
+      <h3>7.3 Command Injection</h3>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">OS Command Injection <span class="severity sev-critical">Nghiêm trọng</span></div>
+          <div class="check-desc">Đầu vào được truyền vào shell command (system, exec, popen, Runtime.exec). Payload: <code>; ls</code>, <code>| whoami</code>, <code>&amp;&amp; id</code>, <code>`id`</code>, <code>$(id)</code>.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Argument Injection <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Đầu vào trở thành argument của lệnh hợp lệ, dù không inject được lệnh mới. Ví dụ: <code>--output=/tmp/x</code>, <code>-o ProxyCommand=...</code> trong ssh.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subcategory">
+      <h3>7.4 Các loại injection khác</h3>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">LDAP Injection <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Bypass xác thực LDAP qua filter: <code>*)(uid=*</code>, <code>*)(&amp;)</code>. Bypass authorization, liệt kê thông tin Active Directory.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">XML/XXE Injection <span class="severity sev-critical">Nghiêm trọng</span></div>
+          <div class="check-desc">XML External Entity — đọc tệp local, SSRF, DoS. Payload: <code>&lt;!DOCTYPE foo [&lt;!ENTITY xxe SYSTEM "file:///etc/passwd"&gt;]&gt;</code>. Tắt DTD, external entity trong XML parser.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Template Injection (SSTI) <span class="severity sev-critical">Nghiêm trọng</span></div>
+          <div class="check-desc">Đầu vào được render qua template engine (Jinja2, Twig, Freemarker, Velocity, Handlebars). Có thể dẫn tới RCE. Payload thử: <code>{{7*7}}</code>, <code>${7*7}</code>, <code>&lt;%= 7*7 %&gt;</code>.</div>
+          <div class="check-tools"><code>tplmap</code><code>SSTImap</code></div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Server-Side Request Forgery (SSRF) <span class="severity sev-critical">Nghiêm trọng</span></div>
+          <div class="check-desc">Lừa server gửi request tới URL bất kỳ (internal services, cloud metadata, file://, gopher://). Hệ quả: truy cập internal network, đánh cắp credentials, RCE.</div>
+          <div class="check-detail"><strong>Bypass filter:</strong> dùng IP decimal/hex (<code>2130706433</code> = 127.0.0.1), DNS rebinding, redirect, IPv6, <code>0.0.0.0</code>, <code>localhost</code>, alternate domain (<code>spoofed.burpcollaborator.net</code>).</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">CRLF Injection / HTTP Response Splitting <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Chèn ký tự xuống dòng <code>%0d%0a</code> vào header. Có thể split response, set cookie, cache poisoning, XSS.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">HTTP Header Injection / Host Header Attack <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Header Host bị chèn để đầu độc cache, password reset poisoning. Header X-Forwarded-Host bypass IP whitelist.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Open Redirect <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Tham số <code>?url=</code>, <code>?next=</code>, <code>?return=</code> chấp nhận URL bên ngoài. Dùng cho phishing, OAuth attack, SSRF chain.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">XPath / XQuery Injection <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Đầu vào không được sanitize trong XPath query, có thể bypass auth tương tự SQLi: <code>' or '1'='1</code>.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Email Header Injection <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Đầu vào dùng cho email (subject, body, address) chứa <code>\r\n</code> để chèn header BCC, From giả mạo.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">CSV Injection / Formula Injection <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Dữ liệu xuất ra Excel/CSV chứa công thức bắt đầu bằng <code>=</code>, <code>+</code>, <code>-</code>, <code>@</code> sẽ thực thi khi mở.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 8. XỬ LÝ LỖI ============ -->
+<section class="category" id="cat-8">
+  <div class="category-header" onclick="toggleCategory(this)">
+    <h2><span class="num-badge">08</span><span class="icon">⚠️</span>Xử lý lỗi và Logging (Error Handling &amp; Logging)</h2>
+    <div class="category-meta"><span class="cat-progress">0/0</span><span class="toggle-icon">▼</span></div>
+  </div>
+  <div class="category-body">
+    <div class="category-intro">
+      Thông báo lỗi quá chi tiết tiết lộ thông tin về kiến trúc, công nghệ, đường dẫn nội bộ. Logging không đầy đủ làm giảm khả năng phát hiện và điều tra sự cố. OWASP A09:2021 — Security Logging and Monitoring Failures.
+    </div>
+
+    <div class="subcategory">
+      <h3>8.1 Xử lý lỗi</h3>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Stack trace và exception lộ ra người dùng <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Tắt debug mode trong production. Lỗi 500 không được trả về stack trace, đường dẫn server, tên thư viện và phiên bản. Trả về thông báo chung cùng với một mã tham chiếu để tra cứu trong log.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Trang lỗi mặc định framework <span class="severity sev-low">Thấp</span></div>
+          <div class="check-desc">Trang 404, 403, 500 mặc định của Tomcat, Whitelabel của Spring Boot, Werkzeug debugger... đều tiết lộ công nghệ. Thay bằng trang tùy chỉnh.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Database error tiết lộ schema <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Thông báo lỗi từ DB (SQL syntax error, table không tồn tại) tiết lộ engine, version, cấu trúc bảng. Hỗ trợ đắc lực cho SQL injection.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subcategory">
+      <h3>8.2 Logging và Monitoring</h3>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Sự kiện được log đầy đủ <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Log: đăng nhập thành công/thất bại, đổi mật khẩu, đổi quyền, truy cập dữ liệu nhạy cảm, lỗi xác thực/phân quyền, request bất thường, thay đổi cấu hình.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Log không chứa dữ liệu nhạy cảm <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Mật khẩu, token, số thẻ tín dụng, CVV, PII không được log plaintext. Mask hoặc loại bỏ trước khi ghi log.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Log Injection <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Đầu vào người dùng vào log chứa newline có thể tạo entry log giả, đánh lừa người phân tích. Sanitize hoặc encode trước khi log.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Bảo vệ log file <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Log file không nằm trong web root, có quyền hạn chế, được sao lưu, có cơ chế chống chỉnh sửa (append-only, SIEM, immutable storage).</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Cảnh báo và phát hiện bất thường <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Có cảnh báo realtime cho: nhiều lần đăng nhập sai, đăng nhập từ vị trí lạ, thao tác admin ngoài giờ, scan lỗ hổng, traffic bất thường.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 9. MÃ HÓA ============ -->
+<section class="category" id="cat-9">
+  <div class="category-header" onclick="toggleCategory(this)">
+    <h2><span class="num-badge">09</span><span class="icon">🔒</span>Mã hóa (Cryptography)</h2>
+    <div class="category-meta"><span class="cat-progress">0/0</span><span class="toggle-icon">▼</span></div>
+  </div>
+  <div class="category-body">
+    <div class="category-intro">
+      OWASP A02:2021 — Cryptographic Failures. Sử dụng mã hóa đúng cách bảo vệ dữ liệu khi lưu trữ và truyền tải. Sai sót thường gặp: dùng thuật toán yếu/cũ, IV/nonce sai, quản lý khóa kém, hard-code key.
+    </div>
+
+    <div class="subcategory">
+      <h3>9.1 Thuật toán và cấu hình</h3>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Thuật toán đối xứng (Symmetric) <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Khuyến nghị: AES-256 ở chế độ GCM hoặc ChaCha20-Poly1305 (AEAD). Tránh: ECB (lộ pattern), CBC không có MAC (padding oracle), DES, 3DES, RC4, Blowfish.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Thuật toán bất đối xứng (Asymmetric) <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">RSA: tối thiểu 2048 bit, khuyến nghị 3072+. ECDSA/EdDSA (Ed25519) tốt hơn cho performance. Tránh các đường cong yếu (P-192, secp192r1).</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Hashing <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Cho mật khẩu: Argon2id, bcrypt, scrypt, PBKDF2. Cho integrity: SHA-256, SHA-3, BLAKE2. Tránh: MD5, SHA-1 (collision).</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Random number generation <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Dùng CSPRNG (<code>secrets</code> trong Python, <code>crypto.randomBytes</code> trong Node, <code>SecureRandom</code> trong Java). Không bao giờ dùng <code>Math.random()</code>, <code>rand()</code>, mt_rand cho token bảo mật.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">IV/Nonce <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">IV phải ngẫu nhiên cho CBC, không trùng lặp cho GCM (gây mất tính bảo mật nghiêm trọng). Không bao giờ hard-code IV.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subcategory">
+      <h3>9.2 Quản lý khóa</h3>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Hard-coded credentials và keys <span class="severity sev-critical">Nghiêm trọng</span></div>
+          <div class="check-desc">Quét mã nguồn tìm khóa API, password, certificate hard-code. Đặc biệt nguy hiểm trong mobile app (decompile dễ).</div>
+          <div class="check-tools"><code>truffleHog</code><code>gitleaks</code><code>detect-secrets</code></div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Lưu trữ khóa <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Key phải lưu trong KMS chuyên dụng (AWS KMS, Azure Key Vault, GCP KMS, HashiCorp Vault) hoặc HSM, không lưu trong DB hoặc file phẳng cùng dữ liệu mã hóa.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Rotation và revocation <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Có quy trình xoay vòng khóa định kỳ, thu hồi khẩn cấp khi nghi ngờ bị lộ, re-encrypt dữ liệu cũ với khóa mới.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Padding Oracle Attack <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Khi dùng CBC mode, sự khác biệt response giữa padding hợp lệ và không hợp lệ cho phép giải mã từng byte. Khắc phục: chuyển sang AEAD (GCM), dùng MAC-then-encrypt.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 10. LOGIC NGHIỆP VỤ ============ -->
+<section class="category" id="cat-10">
+  <div class="category-header" onclick="toggleCategory(this)">
+    <h2><span class="num-badge">10</span><span class="icon">🧠</span>Logic nghiệp vụ (Business Logic)</h2>
+    <div class="category-meta"><span class="cat-progress">0/0</span><span class="toggle-icon">▼</span></div>
+  </div>
+  <div class="category-body">
+    <div class="category-intro">
+      Lỗ hổng logic nghiệp vụ không thể phát hiện bằng công cụ tự động — phụ thuộc vào việc hiểu sâu quy trình, mục đích sử dụng và các giả định ngầm của ứng dụng. Đây là lĩnh vực sáng tạo nhất của penetration testing.
+    </div>
+
+    <div class="subcategory">
+      <h3>10.1 Lỗi tuần tự và trạng thái</h3>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Bỏ qua bước trong quy trình <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Trong wizard nhiều bước (đăng ký, thanh toán, KYC), thử nhảy thẳng tới bước cuối hoặc bỏ qua bước xác thực, OTP, captcha.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Race Condition <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Gửi đồng thời nhiều request để khai thác cửa sổ thời gian giữa kiểm tra và thực thi (TOCTOU). Ví dụ: rút tiền trùng lặp, dùng coupon nhiều lần, tạo nhiều tài khoản với cùng email.</div>
+          <div class="check-tools"><code>Burp Turbo Intruder</code><code>race-the-web</code></div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Replay Attack <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Replay lại request thanh toán, request xác nhận, callback từ payment gateway. Kiểm tra nonce/idempotency key.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subcategory">
+      <h3>10.2 Lỗ hổng tài chính và tham số</h3>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Thao túng giá và số lượng <span class="severity sev-critical">Nghiêm trọng</span></div>
+          <div class="check-desc">Thay đổi giá trong request (giá âm, giá 0, giá nhỏ hơn), số lượng âm để được hoàn tiền, decimal exploit (0.001 USD), tiền tệ khác (cùng số nhưng đơn vị khác).</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Integer Overflow/Underflow <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Số quá lớn (2^31-1) làm overflow thành số âm, hoặc số âm làm underflow. Áp dụng với số lượng, giá, balance, age.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Coupon/Promotion abuse <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Áp dụng nhiều coupon, dùng lại coupon, giả mạo loại coupon, kết hợp coupon không cho phép, áp dụng coupon hết hạn qua manipulation.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Refund và hoàn tiền <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Hoàn tiền nhiều lần cùng đơn, hoàn tiền sau khi đã ship, hoàn tiền số tiền lớn hơn đơn. Race condition giữa refund và new order.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subcategory">
+      <h3>10.3 Giả định nghiệp vụ</h3>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Validation chỉ ở client <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Field readonly, disabled, hidden ở UI nhưng server không validate. Validation regex chỉ ở JavaScript, có thể bypass bằng request trực tiếp.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Giới hạn nghiệp vụ <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Bypass giới hạn (1 tài khoản/người, 1 phiếu giảm/đơn, 1 đánh giá/khách hàng) qua manipulation request, race condition, đa thiết bị.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Workflow circumvention <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Đi tắt qua các bước phê duyệt, kiểm duyệt. Ví dụ: gọi trực tiếp API publish thay vì qua flow request → review → approve.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 11. CLIENT-SIDE ============ -->
+<section class="category" id="cat-11">
+  <div class="category-header" onclick="toggleCategory(this)">
+    <h2><span class="num-badge">11</span><span class="icon">🌐</span>Bảo mật phía client (Client-side Security)</h2>
+    <div class="category-meta"><span class="cat-progress">0/0</span><span class="toggle-icon">▼</span></div>
+  </div>
+  <div class="category-body">
+    <div class="category-intro">
+      Mặc dù không tin cậy phía client, nhưng nhiều lỗ hổng tấn công người dùng (XSS, CSRF, Clickjacking) phát sinh từ thiếu bảo vệ ở client. Hạng mục này tập trung vào các kỹ thuật bảo vệ trình duyệt.
+    </div>
+
+    <div class="subcategory">
+      <h3>11.1 Cross-site và frame attacks</h3>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Cross-Site Request Forgery (CSRF) <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Mọi request thay đổi state (POST, PUT, DELETE) phải được bảo vệ bằng CSRF token (synchronizer token, double submit cookie) hoặc SameSite cookie. Kiểm tra cả các action GET nhạy cảm (logout, undo).</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Clickjacking / UI Redressing <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Đảm bảo trang nhạy cảm (đổi mật khẩu, thanh toán, transfer) không thể được nhúng iframe bởi site khác. Kiểm tra X-Frame-Options và CSP frame-ancestors.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">CORS Misconfiguration <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Kiểm tra: <code>Access-Control-Allow-Origin: *</code> kèm <code>Allow-Credentials: true</code> (không hợp lệ về spec nhưng nguy hiểm), reflect Origin từ request, cho phép origin null, regex sai khớp subdomain attacker.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">PostMessage Security <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">postMessage giữa các iframe phải kiểm tra origin nguồn (event.origin) và đích (targetOrigin cụ thể, không '*'). Validate dữ liệu message vì nó không tin cậy.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Tabnabbing (target=_blank) <span class="severity sev-low">Thấp</span></div>
+          <div class="check-desc">Liên kết với <code>target="_blank"</code> phải có <code>rel="noopener noreferrer"</code> để tránh tab mới chiếm tab cũ qua window.opener.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subcategory">
+      <h3>11.2 Lưu trữ phía client</h3>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Dữ liệu nhạy cảm trong localStorage/sessionStorage <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">localStorage có thể đọc bởi mọi script trong cùng origin → bị XSS sẽ lộ. Không lưu JWT, password, PII. Cookie HttpOnly an toàn hơn cho token.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Service Worker và Cache <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Service worker có quyền cao (chặn fetch). Phải đăng ký với scope hạn chế. Cache không lưu dữ liệu cá nhân của user khác.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Web SQL / IndexedDB <span class="severity sev-low">Thấp</span></div>
+          <div class="check-desc">Kiểm tra dữ liệu lưu offline có mã hóa không, có cơ chế xóa khi logout không.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subcategory">
+      <h3>11.3 Mã JavaScript và phụ thuộc</h3>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Subresource Integrity (SRI) <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Tất cả script/CSS từ CDN bên thứ ba phải có thuộc tính <code>integrity</code> (hash SHA-256/384/512) để chống bị thay đổi từ CDN.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Thư viện JavaScript có lỗ hổng <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Quét các thư viện jQuery, Angular, React, Vue, Lodash phiên bản cũ có CVE đã biết. Magecart và supply chain attacks ngày càng phổ biến.</div>
+          <div class="check-tools"><code>retire.js</code><code>npm audit</code><code>snyk</code></div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Source Map exposure <span class="severity sev-low">Thấp</span></div>
+          <div class="check-desc">Tệp .map có thể tiết lộ mã nguồn gốc với comment, biến rõ ràng. Nên không deploy hoặc đặt sau auth.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Prototype Pollution <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Lỗ hổng JS cho phép thêm property vào Object.prototype, ảnh hưởng tất cả object. Khai thác qua merge function, query string parser. Có thể gây RCE trong Node.js.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 12. UPLOAD TỆP ============ -->
+<section class="category" id="cat-12">
+  <div class="category-header" onclick="toggleCategory(this)">
+    <h2><span class="num-badge">12</span><span class="icon">📁</span>Tải lên tệp (File Upload)</h2>
+    <div class="category-meta"><span class="cat-progress">0/0</span><span class="toggle-icon">▼</span></div>
+  </div>
+  <div class="category-body">
+    <div class="category-intro">
+      Upload tệp là một trong những điểm vào nguy hiểm nhất — có thể dẫn tới webshell, RCE, XSS, đánh cắp dữ liệu. Cần kiểm soát chặt cả nội dung tệp, định dạng, kích thước và nơi lưu trữ.
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Kiểm tra phần mở rộng (extension) <span class="severity sev-high">Cao</span></div>
+        <div class="check-desc">Whitelist extension cho phép, không blacklist. Kiểm tra cả extension kép (file.php.jpg, file.jpg.php), extension viết hoa thường, extension đặc biệt (.phtml, .phps, .pht, .phar, .htaccess, .config).</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Kiểm tra Content-Type và Magic Bytes <span class="severity sev-high">Cao</span></div>
+        <div class="check-desc">Không tin Content-Type từ client. Kiểm tra magic bytes (file signature) thực sự khớp với extension. Có thể chèn payload sau magic bytes hợp lệ (polyglot).</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Path Traversal qua tên file <span class="severity sev-high">Cao</span></div>
+        <div class="check-desc">Tên file có chứa <code>../</code>, <code>..\\</code> để ghi đè file hệ thống. Sanitize tên hoặc dùng tên ngẫu nhiên.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Lưu trữ tệp ngoài web root <span class="severity sev-high">Cao</span></div>
+        <div class="check-desc">Tệp upload không lưu trong thư mục có thể truy cập trực tiếp. Phục vụ qua handler kiểm soát quyền và Content-Type chính xác.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Tắt thực thi script trong thư mục upload <span class="severity sev-high">Cao</span></div>
+        <div class="check-desc">Trong thư mục lưu upload, vô hiệu hóa thực thi PHP/ASP/JSP. Cấu hình nginx <code>location ~ \.php$ { return 403; }</code> trong thư mục uploads, hoặc Apache <code>php_flag engine off</code>.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Quét virus/malware <span class="severity sev-medium">Trung bình</span></div>
+        <div class="check-desc">Tích hợp ClamAV, hoặc dịch vụ cloud (VirusTotal, MetaDefender) để quét tệp upload trước khi lưu/trả về.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Giới hạn kích thước và số lượng <span class="severity sev-medium">Trung bình</span></div>
+        <div class="check-desc">Giới hạn kích thước theo loại tệp, số file/request, tổng dung lượng/user/ngày. Tránh DoS qua upload tệp khổng lồ.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">XSS qua tệp ảnh/SVG/PDF <span class="severity sev-high">Cao</span></div>
+        <div class="check-desc">SVG có thể chứa &lt;script&gt;. Ảnh có thể chứa metadata XSS. PDF có thể chứa JS. Phục vụ với <code>Content-Disposition: attachment</code> và Content-Type chính xác.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">ImageMagick / FFmpeg / image library exploits <span class="severity sev-high">Cao</span></div>
+        <div class="check-desc">Các thư viện xử lý media có nhiều CVE (ImageTragick, Ghostscript). Dùng phiên bản cập nhật, sandbox, vô hiệu coder nguy hiểm.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Zip Slip và Decompression Bombs <span class="severity sev-high">Cao</span></div>
+        <div class="check-desc">Khi xử lý zip/tar, kiểm tra path entries không có <code>../</code>. Giới hạn tổng kích thước giải nén để tránh zip bomb (10GB từ file 1MB).</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 13. API ============ -->
+<section class="category" id="cat-13">
+  <div class="category-header" onclick="toggleCategory(this)">
+    <h2><span class="num-badge">13</span><span class="icon">🔌</span>Bảo mật API (API Security — REST/GraphQL/SOAP)</h2>
+    <div class="category-meta"><span class="cat-progress">0/0</span><span class="toggle-icon">▼</span></div>
+  </div>
+  <div class="category-body">
+    <div class="category-intro">
+      OWASP API Security Top 10 là tiêu chuẩn riêng cho API. API thường thiếu UI giúp người dùng phát hiện sự cố, và lộ trực tiếp cấu trúc dữ liệu nội bộ. Cần kiểm thử cả tài liệu API (Swagger, GraphQL introspection).
+    </div>
+
+    <div class="subcategory">
+      <h3>13.1 OWASP API Top 10</h3>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">API1 — Broken Object Level Authorization (BOLA) <span class="severity sev-critical">Nghiêm trọng</span></div>
+          <div class="check-desc">Tương tự IDOR — endpoint không kiểm tra user có quyền truy cập object đó không. Phổ biến nhất trong API.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">API2 — Broken Authentication <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Authentication endpoint thiếu rate limit, JWT yếu, mật khẩu gửi qua URL, refresh token không rotation.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">API3 — Broken Object Property Level Authorization <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Excessive Data Exposure (trả về quá nhiều property) hoặc Mass Assignment (cho phép set property nhạy cảm).</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">API4 — Unrestricted Resource Consumption <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Thiếu rate limit, không giới hạn payload size, query phức tạp gây DoS, batch operation không giới hạn.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">API5 — Broken Function Level Authorization <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">User thường truy cập được endpoint admin chỉ vì biết URL. Test mọi method và endpoint với từng vai trò.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">API6 — Unrestricted Access to Sensitive Business Flows <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Bot tự động hóa các flow nhạy cảm (booking ticket, mua hàng giới hạn, đánh giá). Cần CAPTCHA, device fingerprint, behavior analysis.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">API7 — Server Side Request Forgery <span class="severity sev-critical">Nghiêm trọng</span></div>
+          <div class="check-desc">API nhận URL từ user (webhook, image fetch, URL preview) — kiểm tra SSRF.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">API8 — Security Misconfiguration <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">CORS sai, header bảo mật thiếu, debug mode bật, error chi tiết, default credentials.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">API9 — Improper Inventory Management <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">API version cũ không deprecate, các endpoint không document, môi trường staging public, shadow API.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">API10 — Unsafe Consumption of APIs <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Tin cậy quá mức response từ API bên thứ ba. Validate, sanitize, không inherit security từ third-party.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subcategory">
+      <h3>13.2 GraphQL</h3>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Introspection bật ở production <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Tắt introspection trong production. Nếu bật, attacker có thể xem toàn bộ schema, mutation, subscription.</div>
+          <div class="check-tools"><code>graphql-voyager</code><code>InQL</code><code>Altair</code></div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Query depth/complexity limit <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">Query lồng sâu (nested) có thể gây DoS. Đặt giới hạn depth, complexity score, rate limit theo query cost.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Batching attack <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Một request chứa nhiều query (alias, batched array) bypass rate limit. Đếm theo từng query, không theo request.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Authorization ở mỗi resolver <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">GraphQL không có khái niệm endpoint, mỗi field/resolver phải tự kiểm tra quyền.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="subcategory">
+      <h3>13.3 Tài liệu API và phiên bản</h3>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Swagger/OpenAPI exposure <span class="severity sev-low">Thấp</span></div>
+          <div class="check-desc">Tệp swagger.json/openapi.yaml ở production có thể tiết lộ endpoint nội bộ. Đưa sau auth hoặc loại bỏ.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">Postman/Insomnia collection rò rỉ <span class="severity sev-medium">Trung bình</span></div>
+          <div class="check-desc">Collection public của developer có thể chứa endpoint, token, header nội bộ.</div>
+        </div>
+      </div>
+
+      <div class="check-item">
+        <input type="checkbox">
+        <div class="check-content">
+          <div class="check-title">API Key bảo mật <span class="severity sev-high">Cao</span></div>
+          <div class="check-desc">API key có scope tối thiểu, có thể thu hồi, rotation định kỳ, không truyền qua URL (lộ qua log/referer), dùng kèm origin restriction nếu có thể.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 14. WebSocket ============ -->
+<section class="category" id="cat-14">
+  <div class="category-header" onclick="toggleCategory(this)">
+    <h2><span class="num-badge">14</span><span class="icon">⚡</span>WebSocket và giao thức real-time</h2>
+    <div class="category-meta"><span class="cat-progress">0/0</span><span class="toggle-icon">▼</span></div>
+  </div>
+  <div class="category-body">
+    <div class="category-intro">
+      WebSocket, Server-Sent Events, WebRTC mang theo các vector tấn công riêng. Nhiều đội bảo mật bỏ qua các giao thức này.
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Cross-Site WebSocket Hijacking (CSWSH) <span class="severity sev-high">Cao</span></div>
+        <div class="check-desc">WebSocket handshake là HTTP request — mang cookie tự động. Nếu không kiểm tra Origin header, attacker có thể mở WS từ site khác. Bắt buộc check Origin và CSRF token.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Authentication và session trong WS <span class="severity sev-high">Cao</span></div>
+        <div class="check-desc">Sau handshake, server phải validate auth cho mỗi message, không chỉ ở handshake. Reauthenticate khi quyền thay đổi.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Input validation trên message <span class="severity sev-high">Cao</span></div>
+        <div class="check-desc">Mọi message được parse phải validate giống HTTP. SQL injection, XSS, command injection vẫn áp dụng.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Rate limit và DoS <span class="severity sev-medium">Trung bình</span></div>
+        <div class="check-desc">Giới hạn số connection/IP, message rate, message size. WS persistent dễ bị abuse.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">WSS (WebSocket Secure) <span class="severity sev-high">Cao</span></div>
+        <div class="check-desc">Dùng wss:// thay vì ws://. WS qua HTTP không mã hóa hoàn toàn (kể cả khi page là HTTPS — browser cảnh báo nhưng cho phép).</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 15. MOBILE/SPA ============ -->
+<section class="category" id="cat-15">
+  <div class="category-header" onclick="toggleCategory(this)">
+    <h2><span class="num-badge">15</span><span class="icon">📱</span>SPA, PWA và Web mobile</h2>
+    <div class="category-meta"><span class="cat-progress">0/0</span><span class="toggle-icon">▼</span></div>
+  </div>
+  <div class="category-body">
+    <div class="category-intro">
+      Single Page Application và Progressive Web App có mô hình bảo mật khác trang truyền thống. Toàn bộ logic UI ở client, mọi thứ thông qua API, có thể bypass UI dễ dàng.
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Authentication trong SPA <span class="severity sev-high">Cao</span></div>
+        <div class="check-desc">Token lưu HttpOnly cookie thay vì localStorage. Refresh token rotation. Logout xóa token cả client và server.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Routing client-side và authorization <span class="severity sev-high">Cao</span></div>
+        <div class="check-desc">Route guard ở client chỉ là UX. Backend phải kiểm tra mọi API call. Đừng tin "admin chỉ thấy menu admin nên không gọi được API admin".</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Manifest và PWA permissions <span class="severity sev-low">Thấp</span></div>
+        <div class="check-desc">manifest.json không yêu cầu quyền không cần thiết. Service Worker có scope giới hạn.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Deep link và URL handler <span class="severity sev-medium">Trung bình</span></div>
+        <div class="check-desc">App handler các custom scheme phải validate URL nguồn. Tránh xử lý JS từ URL.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 16. PRIVACY ============ -->
+<section class="category" id="cat-16">
+  <div class="category-header" onclick="toggleCategory(this)">
+    <h2><span class="num-badge">16</span><span class="icon">🔏</span>Quyền riêng tư và bảo vệ dữ liệu</h2>
+    <div class="category-meta"><span class="cat-progress">0/0</span><span class="toggle-icon">▼</span></div>
+  </div>
+  <div class="category-body">
+    <div class="category-intro">
+      Tuân thủ GDPR (EU), CCPA (California), Nghị định 13/2023/NĐ-CP (Việt Nam — Bảo vệ dữ liệu cá nhân), HIPAA (y tế), PCI-DSS (thanh toán).
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Thu thập dữ liệu tối thiểu <span class="severity sev-medium">Trung bình</span></div>
+        <div class="check-desc">Chỉ thu thập dữ liệu thực sự cần thiết. Không yêu cầu CMND/CCCD, ngày sinh, số điện thoại nếu không có lý do nghiệp vụ.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Sự đồng ý (Consent) <span class="severity sev-medium">Trung bình</span></div>
+        <div class="check-desc">Cookie banner đúng chuẩn (không pre-check, dễ từ chối, granular). Lấy consent rõ ràng cho marketing, share dữ liệu bên thứ ba.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Mã hóa dữ liệu nhạy cảm khi lưu <span class="severity sev-high">Cao</span></div>
+        <div class="check-desc">PII, dữ liệu tài chính, sức khỏe phải mã hóa khi lưu (encryption at rest). Dùng Tokenization cho số thẻ. Hash số CMND nếu chỉ cần tra cứu.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Quyền của chủ thể dữ liệu <span class="severity sev-medium">Trung bình</span></div>
+        <div class="check-desc">Cung cấp khả năng: xem/tải dữ liệu (data portability), xóa tài khoản và dữ liệu (right to erasure), sửa dữ liệu sai. Quy trình xác thực để chống lạm dụng.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Tracker và cookie bên thứ ba <span class="severity sev-medium">Trung bình</span></div>
+        <div class="check-desc">Audit các tracker (Google Analytics, Facebook Pixel, hotjar). Đảm bảo không tracker tải trước khi consent. Kiểm tra fingerprinting kỹ thuật.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Data retention <span class="severity sev-low">Thấp</span></div>
+        <div class="check-desc">Có chính sách lưu trữ rõ ràng — dữ liệu hết mục đích phải xóa. Backup cũng phải tuân thủ.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Khu vực địa lý và Cross-border data transfer <span class="severity sev-medium">Trung bình</span></div>
+        <div class="check-desc">Lưu dữ liệu công dân Việt Nam trong nước theo Nghị định 53/2022. Data transfer cross-border cần Standard Contractual Clauses (GDPR).</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 17. INFRASTRUCTURE ============ -->
+<section class="category" id="cat-17">
+  <div class="category-header" onclick="toggleCategory(this)">
+    <h2><span class="num-badge">17</span><span class="icon">🏗️</span>Hạ tầng và Hardening</h2>
+    <div class="category-meta"><span class="cat-progress">0/0</span><span class="toggle-icon">▼</span></div>
+  </div>
+  <div class="category-body">
+    <div class="category-intro">
+      Bảo mật ứng dụng không thể tách rời khỏi hạ tầng. Hardening hệ điều hành, network, firewall, IDS/IPS, backup là nền tảng cho mọi biện pháp ở tầng ứng dụng.
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Network segmentation <span class="severity sev-medium">Trung bình</span></div>
+        <div class="check-desc">Phân tách DB, application server, file storage qua VLAN/subnet/security group. Nguyên tắc least exposure — chỉ cổng cần thiết mới mở.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Firewall rules và Security Group <span class="severity sev-medium">Trung bình</span></div>
+        <div class="check-desc">Default deny, whitelist rule cụ thể. Định kỳ rà soát rule cũ. Không để 0.0.0.0/0 trên cổng SSH/RDP/DB.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">DDoS protection <span class="severity sev-medium">Trung bình</span></div>
+        <div class="check-desc">Triển khai bảo vệ DDoS lớp 3/4 (Cloudflare, AWS Shield, Imperva) và lớp 7 (rate limit, challenge). Kiểm tra cấu hình mitigation.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">WAF rules và tuning <span class="severity sev-medium">Trung bình</span></div>
+        <div class="check-desc">WAF có rule cập nhật, custom rule cho ứng dụng, log mode trước khi block. Định kỳ test bypass WAF.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Backup và disaster recovery <span class="severity sev-medium">Trung bình</span></div>
+        <div class="check-desc">Backup tự động, mã hóa, lưu offsite/offline (chống ransomware). Định kỳ test restore. Có RPO/RTO được định nghĩa và đo lường.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Patch management <span class="severity sev-high">Cao</span></div>
+        <div class="check-desc">Có quy trình vá lỗi định kỳ và khẩn cấp. Theo dõi CVE liên quan đến stack. Test patch trên staging trước.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">SSH hardening <span class="severity sev-medium">Trung bình</span></div>
+        <div class="check-desc">Tắt password auth (chỉ key), tắt root login, đổi cổng nếu phù hợp, fail2ban, MFA cho jump host, audit log.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Container security <span class="severity sev-medium">Trung bình</span></div>
+        <div class="check-desc">Image base tối giản (alpine, distroless), không chạy root, read-only filesystem, drop capabilities, security context, image scanning.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 18. DEPENDENCY ============ -->
+<section class="category" id="cat-18">
+  <div class="category-header" onclick="toggleCategory(this)">
+    <h2><span class="num-badge">18</span><span class="icon">📦</span>Quản lý phụ thuộc và Chuỗi cung ứng (Supply Chain)</h2>
+    <div class="category-meta"><span class="cat-progress">0/0</span><span class="toggle-icon">▼</span></div>
+  </div>
+  <div class="category-body">
+    <div class="category-intro">
+      OWASP A06:2021 — Vulnerable and Outdated Components. Tấn công supply chain (SolarWinds, Log4Shell, npm packages) ngày càng tinh vi và thiệt hại lớn. Phải có cái nhìn toàn diện về mọi thành phần trong stack.
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">SBOM (Software Bill of Materials) <span class="severity sev-medium">Trung bình</span></div>
+        <div class="check-desc">Có bảng kê đầy đủ thành phần (direct + transitive dependency, OS package, container layer). Định dạng SPDX hoặc CycloneDX.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Vulnerability scanning <span class="severity sev-high">Cao</span></div>
+        <div class="check-desc">Quét CVE tự động trong CI/CD. Fail build với lỗ hổng critical. Theo dõi advisory mới (GitHub Advisory, Snyk DB).</div>
+        <div class="check-tools"><code>OWASP Dependency-Check</code><code>snyk</code><code>trivy</code><code>grype</code><code>dependabot</code></div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Lockfile và pinning <span class="severity sev-medium">Trung bình</span></div>
+        <div class="check-desc">Dùng lockfile (package-lock.json, yarn.lock, Pipfile.lock, Gemfile.lock, go.sum) để pin version. Audit hash để chống tampering.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Dependency confusion <span class="severity sev-high">Cao</span></div>
+        <div class="check-desc">Nội bộ có private package nhưng tên trùng public. Attacker upload version cao hơn lên npm/PyPI, build tự lấy gói public. Dùng scoped package, mirror, scope to internal registry.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Typosquatting <span class="severity sev-medium">Trung bình</span></div>
+        <div class="check-desc">Package với tên gần giống (lodahs vs lodash) chứa malware. Review package mới thêm cẩn thận.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">License compliance <span class="severity sev-low">Thấp</span></div>
+        <div class="check-desc">Tránh license không tương thích (GPL trong proprietary). Có công cụ scan license tự động.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Build pipeline integrity <span class="severity sev-high">Cao</span></div>
+        <div class="check-desc">Reproducible build, signed artifact (Sigstore, Cosign), provenance attestation (SLSA framework). Bảo vệ CI/CD secret và runner.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 19. SOCIAL ENGINEERING ============ -->
+<section class="category" id="cat-19">
+  <div class="category-header" onclick="toggleCategory(this)">
+    <h2><span class="num-badge">19</span><span class="icon">🎭</span>Khía cạnh con người và Social Engineering</h2>
+    <div class="category-meta"><span class="cat-progress">0/0</span><span class="toggle-icon">▼</span></div>
+  </div>
+  <div class="category-body">
+    <div class="category-intro">
+      Hơn 80% sự cố thực tế bắt đầu từ phishing hoặc lỗi con người. Đánh giá toàn diện phải bao gồm cả khả năng chống chịu của tổ chức và người dùng cuối.
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Email spoofing và DMARC <span class="severity sev-medium">Trung bình</span></div>
+        <div class="check-desc">SPF, DKIM, DMARC (p=reject) cấu hình đúng cho tên miền chính và phụ. Test spoofing với mail-tester, dmarcian.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Phishing simulation <span class="severity sev-medium">Trung bình</span></div>
+        <div class="check-desc">Định kỳ mô phỏng phishing với nhân viên, đo lường click rate, follow up training. Dùng Gophish, KnowBe4.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Awareness training <span class="severity sev-medium">Trung bình</span></div>
+        <div class="check-desc">Nhân viên được training về phishing, password, xử lý dữ liệu, báo cáo sự cố. Có kiểm tra hiệu quả.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Helpdesk verification <span class="severity sev-medium">Trung bình</span></div>
+        <div class="check-desc">Quy trình xác thực qua điện thoại trước khi reset password, đổi MFA. Vishing là vector phổ biến.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Bảo vệ thông tin nhân viên public <span class="severity sev-low">Thấp</span></div>
+        <div class="check-desc">LinkedIn, GitHub, blog cá nhân tiết lộ stack nội bộ, structure tổ chức. Có hướng dẫn về OPSEC.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 20. INCIDENT RESPONSE ============ -->
+<section class="category" id="cat-20">
+  <div class="category-header" onclick="toggleCategory(this)">
+    <h2><span class="num-badge">20</span><span class="icon">🚨</span>Ứng phó sự cố và Recovery</h2>
+    <div class="category-meta"><span class="cat-progress">0/0</span><span class="toggle-icon">▼</span></div>
+  </div>
+  <div class="category-body">
+    <div class="category-intro">
+      Phòng ngừa không bao giờ tuyệt đối — phải chuẩn bị phát hiện và phản ứng. Đo lường thời gian phát hiện (MTTD) và thời gian ứng phó (MTTR) là key metric.
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Incident Response Plan <span class="severity sev-medium">Trung bình</span></div>
+        <div class="check-desc">Có kế hoạch IR thành văn bản: phân loại sự cố, đội phụ trách, escalation, communication. Cập nhật và diễn tập định kỳ.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">SIEM và alerting <span class="severity sev-medium">Trung bình</span></div>
+        <div class="check-desc">Tập trung log từ tất cả nguồn (app, OS, network, cloud). Alert có ngưỡng phù hợp, không quá noise. Có on-call rotation.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Forensic readiness <span class="severity sev-low">Thấp</span></div>
+        <div class="check-desc">Log đủ chi tiết để điều tra (request body, response, full URL, user, IP, timestamp). Lưu trữ đủ lâu (90 ngày tối thiểu).</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Bug bounty / Vulnerability Disclosure Program <span class="severity sev-low">Thấp</span></div>
+        <div class="check-desc">Có security.txt với hướng dẫn báo cáo. Quy trình xử lý báo cáo từ nhà nghiên cứu. Đảm bảo không pháp lý hóa nỗ lực thiện chí.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Communication plan <span class="severity sev-low">Thấp</span></div>
+        <div class="check-desc">Plan thông báo: cơ quan chức năng (theo NĐ 13/2023 trong 72h), khách hàng, public. Template chuẩn bị sẵn.</div>
+      </div>
+    </div>
+
+    <div class="check-item">
+      <input type="checkbox">
+      <div class="check-content">
+        <div class="check-title">Post-incident review <span class="severity sev-low">Thấp</span></div>
+        <div class="check-desc">Sau mỗi sự cố có RCA (root cause analysis) blameless, action item theo dõi đến hoàn thành.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p>📋 Danh sách kiểm tra này được biên soạn dựa trên: <strong>OWASP Web Security Testing Guide v4.2</strong>, <strong>OWASP ASVS v4.0</strong>, <strong>OWASP API Security Top 10 (2023)</strong>, <strong>NIST SP 800-115</strong>, <strong>PTES</strong>, <strong>CWE/SANS Top 25</strong>.</p>
+  <p style="margin-top: 8px;">⚠️ <em>Tiến độ kiểm tra được lưu tự động trong trình duyệt của bạn (localStorage). Sử dụng nút "Đặt lại" để xóa.</em></p>
+  <p style="margin-top: 8px;">Phiên bản: 1.0 — Việt hóa toàn diện cho đội ngũ kiểm thử bảo mật ứng dụng web.</p>
+</footer>
+
+</div>
+
+<script>
+  // Toggle danh mục
+  function toggleCategory(header) {
+    const cat = header.parentElement;
+    cat.classList.toggle('collapsed');
+  }
+
+  function expandAll() {
+    document.querySelectorAll('.category').forEach(c => c.classList.remove('collapsed'));
+  }
+
+  function collapseAll() {
+    document.querySelectorAll('.category').forEach(c => c.classList.add('collapsed'));
+  }
+
+  // Lưu/khôi phục trạng thái checkbox
+  const STORAGE_KEY = 'web-security-checklist-v1';
+
+  function getCheckboxId(cb) {
+    const cat = cb.closest('.category').id;
+    const items = Array.from(document.querySelectorAll(`#${cat} input[type="checkbox"]`));
+    return `${cat}-${items.indexOf(cb)}`;
+  }
+
+  function saveState() {
+    const state = {};
+    document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+      state[getCheckboxId(cb)] = cb.checked;
+    });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
+
+  function loadState() {
+    try {
+      const state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        const id = getCheckboxId(cb);
+        if (state[id]) {
+          cb.checked = true;
+          cb.closest('.check-item').classList.add('checked');
+        }
+      });
+    } catch(e) { console.warn('Cannot load state', e); }
+  }
+
+  function resetAll() {
+    if (!confirm('Bạn có chắc muốn đặt lại toàn bộ checklist? Mọi tiến độ sẽ bị xóa.')) return;
+    document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+      cb.checked = false;
+      cb.closest('.check-item').classList.remove('checked');
+    });
+    localStorage.removeItem(STORAGE_KEY);
+    updateProgress();
+  }
+
+  // Cập nhật tiến độ
+  function updateProgress() {
+    const all = document.querySelectorAll('input[type="checkbox"]');
+    const checked = document.querySelectorAll('input[type="checkbox"]:checked');
+    const total = all.length;
+    const done = checked.length;
+    const pct = total ? Math.round((done / total) * 100) : 0;
+
+    document.getElementById('total-items').textContent = total;
+    document.getElementById('checked-count').textContent = done;
+    document.getElementById('completion-rate').textContent = pct + '%';
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-fill').textContent = pct + '%';
+    document.getElementById('progress-text').textContent = `Đã hoàn thành ${done} trên ${total} mục kiểm tra`;
+
+    // Tiến độ theo category
+    document.querySelectorAll('.category').forEach(cat => {
+      const items = cat.querySelectorAll('input[type="checkbox"]');
+      const done = cat.querySelectorAll('input[type="checkbox"]:checked').length;
+      const meta = cat.querySelector('.cat-progress');
+      if (meta) meta.textContent = `${done}/${items.length}`;
+    });
+  }
+
+  // Xử lý sự kiện checkbox
+  document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      cb.closest('.check-item').classList.toggle('checked', cb.checked);
+      saveState();
+      updateProgress();
+    });
+  });
+
+  // Tìm kiếm
+  document.getElementById('search').addEventListener('input', e => {
+    const q = e.target.value.toLowerCase().trim();
+    document.querySelectorAll('.check-item').forEach(item => {
+      const text = item.textContent.toLowerCase();
+      item.classList.toggle('hidden', q && !text.includes(q));
+    });
+    document.querySelectorAll('.category').forEach(cat => {
+      const visible = cat.querySelectorAll('.check-item:not(.hidden)').length;
+      cat.style.display = q && visible === 0 ? 'none' : '';
+      if (q && visible > 0) cat.classList.remove('collapsed');
+    });
+  });
+
+  // Tạo mục lục
+  function buildTOC() {
+    const tocList = document.getElementById('toc-list');
+    document.querySelectorAll('.category').forEach(cat => {
+      const title = cat.querySelector('.category-header h2').textContent.replace(/^\d+\s/, '');
+      const id = cat.id;
+      const li = document.createElement('li');
+      li.innerHTML = `<a href="#${id}">${title}</a>`;
+      tocList.appendChild(li);
+    });
+    document.getElementById('total-categories').textContent = document.querySelectorAll('.category').length;
+  }
+
+  // Xuất báo cáo
+  function exportReport() {
+    let report = '# BÁO CÁO KIỂM THỬ BẢO MẬT WEB\n\n';
+    report += `Ngày: ${new Date().toLocaleDateString('vi-VN')}\n\n`;
+    const total = document.querySelectorAll('input[type="checkbox"]').length;
+    const done = document.querySelectorAll('input[type="checkbox"]:checked').length;
+    report += `**Tổng tiến độ:** ${done}/${total} (${Math.round(done/total*100)}%)\n\n`;
+    report += '---\n\n';
+
+    document.querySelectorAll('.category').forEach(cat => {
+      const title = cat.querySelector('.category-header h2').textContent.trim();
+      const items = cat.querySelectorAll('.check-item');
+      const doneCat = cat.querySelectorAll('input[type="checkbox"]:checked').length;
+      report += `## ${title}\n`;
+      report += `Tiến độ: ${doneCat}/${items.length}\n\n`;
+      items.forEach(item => {
+        const checked = item.querySelector('input[type="checkbox"]').checked;
+        const titleText = item.querySelector('.check-title')?.textContent.trim() || '';
+        report += `- [${checked ? 'x' : ' '}] ${titleText}\n`;
+      });
+      report += '\n';
+    });
+
+    const blob = new Blob([report], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `bao-cao-kiem-thu-bao-mat-${new Date().toISOString().slice(0,10)}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // Khởi tạo
+  buildTOC();
+  loadState();
+  updateProgress();
+</script>
+
+</body>
+</html>
